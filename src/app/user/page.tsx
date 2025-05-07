@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { io, Socket } from 'socket.io-client';
 
 export default function UserPage() {
   const [scanning, setScanning] = useState(false);
@@ -9,6 +10,8 @@ export default function UserPage() {
   const [durationHours, setDurationHours] = useState<number | null>(null);
   const [countdown, setCountdown] = useState<string>('');
   const html5QrcodeScannerRef = useRef<any>(null);
+  const socketRef = useRef<Socket | null>(null);
+  const watchIdRef = useRef<number | null>(null);
   const router = useRouter();
 
   // Function to start the scanner
@@ -49,6 +52,38 @@ export default function UserPage() {
               startCountdown(parsed.createdAt, parsed.durationHours);
               // Automatically navigate to trips page with durationHours
               router.push(`/user/trips?durationHours=${parsed.durationHours}`);
+
+              // Initialize socket connection and start sending location updates
+              if (!socketRef.current) {
+                socketRef.current = io();
+                socketRef.current.on('connect', () => {
+                  console.log('Socket connected:', socketRef.current?.id);
+                  socketRef.current?.emit('joinSession', parsed.content);
+                });
+              }
+
+              if (navigator.geolocation) {
+                if (watchIdRef.current !== null) {
+                  navigator.geolocation.clearWatch(watchIdRef.current);
+                }
+                watchIdRef.current = navigator.geolocation.watchPosition(
+                  (position) => {
+                    const { latitude, longitude } = position.coords;
+                    console.log('Sending location update:', latitude, longitude);
+                    socketRef.current?.emit('locationUpdate', {
+                      sessionId: parsed.content,
+                      latitude,
+                      longitude,
+                    });
+                  },
+                  (error) => {
+                    console.error('Error getting location:', error);
+                  },
+                  { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+                );
+              } else {
+                console.error('Geolocation is not supported by this browser.');
+              }
             } else {
               setDecodedText(decodedResult);
               setDurationHours(null);
@@ -81,6 +116,18 @@ export default function UserPage() {
       });
     } else {
       setScanning(false);
+    }
+
+    // Stop watching location
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+
+    // Disconnect socket
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
     }
   };
 
@@ -116,6 +163,12 @@ export default function UserPage() {
       if (html5QrcodeScannerRef.current) {
         html5QrcodeScannerRef.current.stop().catch(() => {});
         html5QrcodeScannerRef.current.clear().catch(() => {});
+      }
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+      if (socketRef.current) {
+        socketRef.current.disconnect();
       }
     };
   }, []);

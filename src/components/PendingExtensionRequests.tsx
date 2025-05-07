@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useEffect, useState } from 'react';
 
@@ -26,7 +26,27 @@ export default function PendingExtensionRequests() {
         throw new Error('Failed to fetch extension requests');
       }
       const data = await res.json();
-      setRequests(data.requests);
+      let fetchedRequests: ExtensionRequest[] = data.requests;
+
+      // Check if student_name is missing or default, fetch correct names
+      const requestsWithNames = await Promise.all(
+        fetchedRequests.map(async (req) => {
+          if (!req.student_name || req.student_name.toLowerCase() === 'pranjal arya') {
+            try {
+              const studentRes = await fetch(`/api/students/${req.student_id}`);
+              if (studentRes.ok) {
+                const studentData = await studentRes.json();
+                return { ...req, student_name: studentData.name || req.student_name };
+              }
+            } catch {
+              // ignore errors, keep original name
+            }
+          }
+          return req;
+        })
+      );
+
+      setRequests(requestsWithNames);
       setError(null);
     } catch (err) {
       if (err instanceof Error) {
@@ -63,23 +83,23 @@ export default function PendingExtensionRequests() {
     }
   };
 
-  if (loading) return <p>Loading extension requests...</p>;
+  if (loading) return <p className='text-[#000000]'>Loading extension requests...</p>;
   if (error) return <p>Error: {error}</p>;
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Pending Extension Requests</h1>
+      <h1 className="text-2xl font-bold mb-4 text-[#000000]">Pending Extension Requests</h1>
       {requests.length === 0 ? (
-        <p>No pending extension requests.</p>
+        <p className='text-[#000000]'>No pending extension requests.</p>
       ) : (
-        <table className="w-full border-collapse border border-gray-300">
+        <table className="w-full text-[#000000] border-collapse border border-gray-300">
           <thead>
             <tr>
-              <th className="border border-gray-300 p-2">Student</th>
-              <th className="border border-gray-300 p-2">Extend Minutes</th>
-              <th className="border border-gray-300 p-2">Message</th>
-              <th className="border border-gray-300 p-2">Requested At</th>
-              <th className="border border-gray-300 p-2">Actions</th>
+              <th className="border text-[#000000] border-gray-300 p-2">Student</th>
+              <th className="border text-[#000000] border-gray-300 p-2">Extend Minutes</th>
+              <th className="border text-[#000000] border-gray-300 p-2">Message</th>
+              <th className="border text-[#000000] border-gray-300 p-2">Requested At</th>
+              <th className="border text-[#000000] border-gray-300 p-2">Actions</th>
             </tr>
           </thead>
           <tbody>

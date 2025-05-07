@@ -3,13 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import QRCode from 'react-qr-code';
+import StudentCardWithMap from '../../../components/StudentCardWithMap';
 
 export default function AdminTripsPage() {
   const searchParams = useSearchParams();
   const preselectedStudentId = searchParams.get('preselectedStudentId');
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [students, setStudents] = useState<{ id: number; name: string }[]>([]);
+  const [students, setStudents] = useState<{ id: number; name: string; sessionId: string; status: string }[]>([]);
   const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
   const [showStudentSelector, setShowStudentSelector] = useState(false);
 
@@ -42,6 +43,7 @@ export default function AdminTripsPage() {
       try {
         const response = await fetch(`/api/students?name=${encodeURIComponent(searchTerm)}`);
         const data = await response.json();
+        // Assuming API returns sessionId and status for each student
         setStudents(data.students || []);
       } catch (error) {
         console.error('Error fetching students:', error);
@@ -65,7 +67,7 @@ export default function AdminTripsPage() {
     );
   };
 
-  const handleAddStudentsToTrip = () => {
+  const handleAddStudentsToTrip = async () => {
     if (!showStudentSelector) {
       setShowStudentSelector(true);
       return;
@@ -74,7 +76,6 @@ export default function AdminTripsPage() {
     console.log('Adding students to trip:', selectedStudents);
     alert(`Added ${selectedStudents.length} students to the trip.`);
     setShowStudentSelector(false);
-    setSelectedStudents([]);
     setSearchTerm('');
 
     // Generate QR code data after confirming students and time allocation
@@ -87,6 +88,31 @@ export default function AdminTripsPage() {
       createdAt: createdAt,
     };
     setQrCodeData(JSON.stringify(payload));
+
+    // Update status of selected students to "on a trip"
+    // Update local students state
+    setStudents((prevStudents) =>
+      prevStudents.map((student) =>
+        selectedStudents.includes(student.id)
+          ? { ...student, status: 'on a trip' }
+          : student
+      )
+    );
+
+    // Optionally, send API request to update student status in backend
+    try {
+      await Promise.all(
+        selectedStudents.map((studentId) =>
+          fetch(`/api/students/${studentId}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'on a trip' }),
+          })
+        )
+      );
+    } catch (error) {
+      console.error('Error updating student status:', error);
+    }
   };
 
   const incrementTime = () => {
@@ -274,6 +300,19 @@ export default function AdminTripsPage() {
                 <QRCode value={qrCodeData} size={200} />
               </div>
             )}
+
+            {/* Display student cards with map */}
+            {/* Removed as per user request */}
+            {/* <div className="w-full mt-8 space-y-6">
+              {students.map((student) => (
+                <StudentCardWithMap
+                  key={student.id}
+                  studentId={student.id}
+                  sessionId={student.sessionId}
+                  studentName={student.name}
+                />
+              ))}
+            </div> */}
           </div>
         </div>
       </div>
