@@ -11,6 +11,7 @@ export default function UserTripsPage() {
   const [extendTime, setExtendTime] = useState(0);
   const [personalMessage, setPersonalMessage] = useState('');
   const [timerDuration, setTimerDuration] = useState(45 * 60); // default 45 minutes in seconds
+  const [allowedToExtend, setAllowedToExtend] = useState(false); // New state to control if extension allowed
   const timerIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -22,9 +23,85 @@ export default function UserTripsPage() {
     }
   }, [durationHoursParam]);
 
+  // Timer countdown effect
+  useEffect(() => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+    }
+    timerIntervalRef.current = window.setInterval(() => {
+      setTimerDuration((prev) => {
+        if (prev <= 1) {
+          if (timerIntervalRef.current) {
+            clearInterval(timerIntervalRef.current);
+          }
+          alert('Session expired!');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+    };
+  }, []);
+
+  // Function to place a call using tel: link
+  const placeCall = (phoneNumber: string) => {
+    window.location.href = `tel:${phoneNumber}`;
+  };
+
+  // Function to send email using mailto: link
+  const sendEmail = (emails: string[], subject: string, body: string) => {
+    const mailtoLink = `mailto:${emails.join(',')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+  };
+
+  // Handlers for call buttons
+
+  // Helper function to record emergency cause
+  const recordEmergencyCause = async (cause: string) => {
+    try {
+      await fetch('/api/emergencies', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cause }),
+      });
+    } catch (error) {
+      console.error('Failed to record emergency cause:', error);
+    }
+  };
+
+  const handleCallHostel = () => {
+    recordEmergencyCause('Call Hostel');
+    placeCall('+918077868866')
+  };
+
+  const handleCallPolice = () => {
+    recordEmergencyCause('Call Police');
+    placeCall('100');
+  };
+
+  const handleEmergency = () => {
+    recordEmergencyCause('Emergency');
+    const emergencyEmails = ['emergency1@example.com', 'emergency2@example.com', 'emergency3@example.com'];
+    const subject = 'Emergency Alert';
+    const body = 'This is an emergency alert from SafeMove app user.';
+    sendEmail(emergencyEmails, subject, body);
+  };
+
+  // Open extend dialog only if allowed
   const openExtendDialog = (time: number) => {
-    setExtendTime(time);
-    setShowExtendDialog(true);
+    if (allowedToExtend) {
+      setExtendTime(time);
+      setShowExtendDialog(true);
+    } else {
+      alert('Extension not allowed by admin yet.');
+    }
   };
 
   const closeExtendDialog = () => {
@@ -78,47 +155,23 @@ export default function UserTripsPage() {
     }
   };
 
+  // Extend time button handler
+  const handleExtendTime = () => {
+    // Open the extend time dialog only if allowed
+    openExtendDialog(15); // default 15 minutes
+  };
+
+  // Time select buttons handler - disabled to prevent changing timer arbitrarily
+  const handleTimeSelect = (minutes: number) => {
+    // Do nothing or alert user that time cannot be changed manually
+    alert('Remaining time can only be changed by admin approval.');
+  };
+
   // Timer display formatting
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  // Timer countdown effect
-  useEffect(() => {
-    if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current);
-    }
-    timerIntervalRef.current = window.setInterval(() => {
-      setTimerDuration((prev) => {
-        if (prev <= 1) {
-          if (timerIntervalRef.current) {
-            clearInterval(timerIntervalRef.current);
-          }
-          alert('Session expired!');
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => {
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current);
-      }
-    };
-  }, []);
-
-  // Extend time button handler
-  const handleExtendTime = () => {
-    // Open the extend time dialog instead of directly extending time
-    openExtendDialog(15); // default 15 minutes
-  };
-
-  // Time select buttons handler
-  const handleTimeSelect = (minutes: number) => {
-    setTimerDuration(minutes * 60);
   };
 
   return (
@@ -172,21 +225,21 @@ export default function UserTripsPage() {
         <button
           className="w-full bg-[#3b56f5] text-white rounded-3xl py-4 text-center text-base font-normal"
           aria-label="Call Hostel"
-          onClick={() => alert('Calling Hostel...')}
+          onClick={handleCallHostel}
         >
           Call Hostel
         </button>
         <button
           className="w-full bg-[#3b56f5] text-white rounded-3xl py-4 text-center text-base font-normal"
           aria-label="Call Police"
-          onClick={() => alert('Calling Police...')}
+          onClick={handleCallPolice}
         >
           Call Police
         </button>
         <button
           className="w-full bg-[#f2300f] text-white rounded-3xl py-4 text-center text-base font-normal"
           aria-label="Emergency"
-          onClick={() => alert('Emergency SOS activated!')}
+          onClick={handleEmergency}
         >
           Emergency
         </button>

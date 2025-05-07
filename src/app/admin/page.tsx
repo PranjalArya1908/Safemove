@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import PendingExtensionRequests from '@/components/PendingExtensionRequests';
 
 export default function AdminPage() {
   const [showModal, setShowModal] = useState(false);
@@ -19,7 +20,9 @@ export default function AdminPage() {
   const [studentsOut, setStudentsOut] = useState(0);
   const [totalTrips, setTotalTrips] = useState(0);
   const [emergencyNumber, setEmergencyNumber] = useState(0);
+  const [emergencyAlerts, setEmergencyAlerts] = useState<Array<{id: number; cause: string; timestamp: string;}>>([]);
 
+<<<<<<< HEAD
   // Notifications state
   const [notifications, setNotifications] = useState<Array<{id: number; message: string; status: string;}>>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
@@ -27,6 +30,9 @@ export default function AdminPage() {
   const [showAllNotifications, setShowAllNotifications] = useState(false);
 
   // Fetch dashboard stats on mount
+=======
+  // Fetch dashboard stats and emergencies on mount
+>>>>>>> 68f1095 (Add emergency event tracking: API, DB schema, user trips and admin dashboard updates)
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {
@@ -42,8 +48,25 @@ export default function AdminPage() {
         console.error('Error fetching dashboard stats:', error);
       }
     };
+
+    const fetchEmergencies = async () => {
+      try {
+        const response = await fetch('/api/emergencies');
+        if (response.ok) {
+          const data = await response.json();
+          setEmergencyAlerts(data.emergencies || []);
+        }
+      } catch (error) {
+        console.error('Error fetching emergencies:', error);
+      }
+    };
+
     fetchDashboardStats();
+<<<<<<< HEAD
     fetchNotifications();
+=======
+    fetchEmergencies();
+>>>>>>> 68f1095 (Add emergency event tracking: API, DB schema, user trips and admin dashboard updates)
   }, []);
 
   const fetchNotifications = async () => {
@@ -214,6 +237,12 @@ export default function AdminPage() {
                     <a className="text-black font-normal leading-5">Settings</a>
                   </Link>
                 </li>
+<<<<<<< HEAD
+=======
+                <li><a href="/admin/students" className="text-[#5B6FFB] font-normal leading-5">Students</a></li>
+                <li><a href="#" className="text-black font-normal leading-5">Emergency</a></li>
+                <li><a href="#" className="text-black font-normal leading-5">Settings</a></li>
+>>>>>>> 68f1095 (Add emergency event tracking: API, DB schema, user trips and admin dashboard updates)
               </ul>
             </nav>
             <button
@@ -308,6 +337,27 @@ export default function AdminPage() {
               )}
             </section>
 
+<<<<<<< HEAD
+=======
+            <section
+              className="border border-gray-300 rounded-2xl p-6 min-h-[200px] text-base font-normal text-[#000000] overflow-y-auto"
+            >
+              <h2 className="font-bold mb-4">Alert Notifications</h2>
+              {emergencyAlerts.length === 0 ? (
+                <p>No emergency alerts</p>
+              ) : (
+                <ul className="space-y-2 max-h-48 overflow-y-auto">
+                  {emergencyAlerts.map((alert) => (
+                    <li key={alert.id} className="border border-red-400 rounded p-2 bg-red-100 text-red-800">
+                      <p><strong>Cause:</strong> {alert.cause}</p>
+                      <p><small>{new Date(alert.timestamp).toLocaleString()}</small></p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+>>>>>>> 68f1095 (Add emergency event tracking: API, DB schema, user trips and admin dashboard updates)
             <section className="col-span-2 grid grid-cols-2 gap-6">
               <div
                 className="border border-gray-300 rounded-2xl p-6 relative flex flex-col justify-between"
@@ -381,28 +431,7 @@ export default function AdminPage() {
             <section
               className="border border-gray-300 rounded-2xl p-6 min-h-[300px] flex flex-col"
             >
-              <div className="flex justify-between items-center mb-4 text-base font-normal text-[#000000]">
-                <h3>Pending Requests</h3>
-                <i className="fas fa-chevron-right text-black"></i>
-              </div>
-              <div
-                className="border border-gray-300 rounded-lg p-3 flex justify-between items-center mb-3"
-              >
-                <div className="flex items-center space-x-2">
-                  <span
-                    className="w-3 h-3 rounded-full bg-[#F28C00] inline-block"
-                    aria-hidden="true"
-                  ></span>
-                  <span className="text-[#000000]">Pratyush</span>
-                </div>
-                <span className="font-semibold text-base text-[#000000]">40 mins</span>
-              </div>
-              <div
-                className="border border-gray-300 rounded-lg p-3 mb-3 min-h-[48px]"
-              ></div>
-              <div
-                className="border border-gray-300 rounded-lg p-3 min-h-[48px]"
-              ></div>
+              <PendingExtensionRequests />
             </section>
           </main>
         </div>
