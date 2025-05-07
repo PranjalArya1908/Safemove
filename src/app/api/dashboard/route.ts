@@ -1,13 +1,9 @@
 import { NextResponse } from 'next/server';
+import { open } from 'sqlite';
+import sqlite3 from 'sqlite3';
+import path from 'path';
+import { NextRequest } from 'next/server';
 
-<<<<<<< HEAD
-export async function GET() {
-  // Mock emergency number data
-  const data = {
-    emergencyNumber: 101
-  };
-  return NextResponse.json(data);
-=======
 async function openDB() {
   const db = await open({
     filename: path.resolve('./students.db'),
@@ -51,5 +47,4 @@ export async function GET(request: NextRequest) {
     console.error('Error fetching dashboard stats:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
->>>>>>> 68f1095 (Add emergency event tracking: API, DB schema, user trips and admin dashboard updates)
 }

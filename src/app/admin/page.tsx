@@ -22,17 +22,13 @@ export default function AdminPage() {
   const [emergencyNumber, setEmergencyNumber] = useState(0);
   const [emergencyAlerts, setEmergencyAlerts] = useState<Array<{id: number; cause: string; timestamp: string;}>>([]);
 
-<<<<<<< HEAD
   // Notifications state
   const [notifications, setNotifications] = useState<Array<{id: number; message: string; status: string;}>>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [errorNotifications, setErrorNotifications] = useState<string | null>(null);
   const [showAllNotifications, setShowAllNotifications] = useState(false);
 
-  // Fetch dashboard stats on mount
-=======
   // Fetch dashboard stats and emergencies on mount
->>>>>>> 68f1095 (Add emergency event tracking: API, DB schema, user trips and admin dashboard updates)
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {
@@ -62,11 +58,7 @@ export default function AdminPage() {
     };
 
     fetchDashboardStats();
-<<<<<<< HEAD
-    fetchNotifications();
-=======
     fetchEmergencies();
->>>>>>> 68f1095 (Add emergency event tracking: API, DB schema, user trips and admin dashboard updates)
   }, []);
 
   const fetchNotifications = async () => {
@@ -147,20 +139,14 @@ export default function AdminPage() {
     e.preventDefault();
 
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('name', formData.name);
-      formDataToSend.append('phone', formData.phone);
+      let base64Image = '';
       if (formData.image) {
-        // For simplicity, convert image file to base64 string
-        const base64Image = await new Promise<string>((resolve, reject) => {
+        base64Image = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
           reader.onerror = reject;
           reader.readAsDataURL(formData.image as Blob);
         });
-        formDataToSend.append('image', base64Image);
-      } else {
-        formDataToSend.append('image', '');
       }
 
       const response = await fetch('/api/students', {
@@ -171,14 +157,7 @@ export default function AdminPage() {
         body: JSON.stringify({
           name: formData.name,
           phone: formData.phone,
-          image: formData.image ? await (async () => {
-            const reader = new FileReader();
-            return new Promise<string>((resolve, reject) => {
-              reader.onload = () => resolve(reader.result as string);
-              reader.onerror = reject;
-              reader.readAsDataURL(formData.image as Blob);
-            });
-          })() : null,
+          image: base64Image || null,
         }),
       });
 
@@ -237,12 +216,6 @@ export default function AdminPage() {
                     <a className="text-black font-normal leading-5">Settings</a>
                   </Link>
                 </li>
-<<<<<<< HEAD
-=======
-                <li><a href="/admin/students" className="text-[#5B6FFB] font-normal leading-5">Students</a></li>
-                <li><a href="#" className="text-black font-normal leading-5">Emergency</a></li>
-                <li><a href="#" className="text-black font-normal leading-5">Settings</a></li>
->>>>>>> 68f1095 (Add emergency event tracking: API, DB schema, user trips and admin dashboard updates)
               </ul>
             </nav>
             <button
@@ -265,25 +238,48 @@ export default function AdminPage() {
             <section
               className="col-span-2 border border-gray-300 rounded-2xl p-6 min-h-[200px] text-base font-normal text-[#000000] overflow-y-auto"
             >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Alert Notifications</h3>
-                <div>
-                  <button
-                    onClick={fetchNotifications}
-                    className="text-blue-600 hover:underline text-sm mr-4"
-                    aria-label="Refresh notifications"
-                  >
-                    Refresh
-                  </button>
-                  <button
-                    onClick={() => setShowAllNotifications(!showAllNotifications)}
-                    className="text-blue-600 hover:underline text-sm"
-                    aria-label={showAllNotifications ? "Show pending notifications" : "Show all notifications"}
-                  >
-                    {showAllNotifications ? "Show Pending" : "Show All"}
-                  </button>
-                </div>
+              <div className="mb-4">
+                <h2 className="text-3xl font-bold mb-4">
+                  <span className="text-black">Lets </span>
+                  <span className="text-blue-600">Plan The trip</span>
+                </h2>
+                <input
+                  type="text"
+                  placeholder="Search students..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  className="w-full border border-gray-300 rounded-full px-3 py-2 text-[#000000] focus:outline-none focus:ring-2 focus:ring-[#5B6FFB]"
+                />
+                {searchResults.length > 0 && (
+                  <ul className="border border-gray-300 rounded mt-2 max-h-48 overflow-y-auto bg-white text-black">
+                    {searchResults.map((student) => (
+                      <li
+                        key={student.id}
+                        className="p-2 cursor-pointer hover:bg-gray-200"
+                        onClick={() => setSelectedStudent(student)}
+                      >
+                        {student.name} - {student.phone}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {selectedStudent && (
+                  <div className="mt-4">
+                    <Link href={`/admin/trips?preselectedStudentId=${selectedStudent.id}`} passHref legacyBehavior>
+                      <a className="inline-block bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors text-center whitespace-nowrap">
+                        Plan the trip
+                      </a>
+                    </Link>
+                  </div>
+                )}
               </div>
+
+            </section>
+
+            <section
+              className="border border-gray-300 rounded-2xl p-6 min-h-[200px] text-base font-normal text-[#000000] overflow-y-auto"
+            >
+              <h2 className="font-bold mb-4">Alert Notifications</h2>
               {loadingNotifications ? (
                 <p>Loading notifications...</p>
               ) : errorNotifications ? (
@@ -337,27 +333,6 @@ export default function AdminPage() {
               )}
             </section>
 
-<<<<<<< HEAD
-=======
-            <section
-              className="border border-gray-300 rounded-2xl p-6 min-h-[200px] text-base font-normal text-[#000000] overflow-y-auto"
-            >
-              <h2 className="font-bold mb-4">Alert Notifications</h2>
-              {emergencyAlerts.length === 0 ? (
-                <p>No emergency alerts</p>
-              ) : (
-                <ul className="space-y-2 max-h-48 overflow-y-auto">
-                  {emergencyAlerts.map((alert) => (
-                    <li key={alert.id} className="border border-red-400 rounded p-2 bg-red-100 text-red-800">
-                      <p><strong>Cause:</strong> {alert.cause}</p>
-                      <p><small>{new Date(alert.timestamp).toLocaleString()}</small></p>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-
->>>>>>> 68f1095 (Add emergency event tracking: API, DB schema, user trips and admin dashboard updates)
             <section className="col-span-2 grid grid-cols-2 gap-6">
               <div
                 className="border border-gray-300 rounded-2xl p-6 relative flex flex-col justify-between"
@@ -536,31 +511,29 @@ export default function AdminPage() {
                 <div className="flex flex-col justify-center h-full">
                   <h2 className="text-3xl font-semibold text-[#000000]">{selectedStudent.name}</h2>
                   <p className="text-lg text-gray-700 mt-2">{selectedStudent.phone}</p>
-              <div className="flex items-center space-x-3 mt-4">
-                <span
-                  className={`w-5 h-5 rounded-full inline-block ${
-                    selectedStudent.status === 'inside hostel' ? 'bg-green-500' : 'bg-red-500'
-                  }`}
-                  aria-label={selectedStudent.status}
-                ></span>
-                <span className="text-lg text-gray-700 capitalize">{selectedStudent.status}</span>
-              </div>
-              {selectedStudent.status === 'inside hostel' && (
-                <div className="mt-6">
-                  <Link href={`/admin/trips?preselectedStudentId=${selectedStudent.id}`} passHref legacyBehavior>
-                    <a className="inline-block bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors text-center">
-                      Plan the trip
-                    </a>
-                  </Link>
+                  <div className="flex items-center space-x-3 mt-4">
+                    <span
+                      className={`w-5 h-5 rounded-full inline-block ${
+                        selectedStudent.status === 'inside hostel' ? 'bg-green-500' : 'bg-red-500'
+                      }`}
+                      aria-label={selectedStudent.status}
+                    ></span>
+                    <span className="text-lg text-gray-700 capitalize">{selectedStudent.status}</span>
+                  </div>
+                  <div className="mt-6">
+                    <Link href={`/admin/trips?preselectedStudentId=${selectedStudent.id}`} passHref legacyBehavior>
+                      <a className="inline-block bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors text-center whitespace-nowrap">
+                        Plan the trip
+                      </a>
+                    </Link>
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    </>
-  )}
-      </div>
-    </main>
-  );
+        </>
+      )}
+    </div>
+  </main>
+);
 }
