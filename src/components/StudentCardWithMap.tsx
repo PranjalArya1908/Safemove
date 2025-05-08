@@ -58,7 +58,15 @@ const StudentCardWithMap = ({
       socketRef.current?.emit("joinSession", sessionId);
     });
 
+    socketRef.current.on("sessionJoined", (data) => {
+      console.log(`StudentCardWithMap: sessionJoined event received`, data);
+      if (!data.success) {
+        console.error(`StudentCardWithMap: Failed to join session: ${data.message}`);
+      }
+    });
+
     socketRef.current.on("locationUpdate", ({ latitude, longitude }) => {
+      console.log(`StudentCardWithMap: locationUpdate received: (${latitude}, ${longitude})`);
       if (mapRef.current) {
         if (markerRef.current) {
           markerRef.current.setLatLng([latitude, longitude]);

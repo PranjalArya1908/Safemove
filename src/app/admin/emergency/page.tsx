@@ -1,143 +1,111 @@
 "use client";
-import React, { useState, useEffect } from 'react';
 
-interface SecurityAction {
-  id: number;
-  description: string;
-  takenBy: string; // "warden" or "student"
-  timestamp: string;
-}
+import React, { useState } from "react";
 
-export default function EmergencyPage() {
-  const [emergencyNumber, setEmergencyNumber] = useState<string>('');
-  const [securityActions, setSecurityActions] = useState<SecurityAction[]>([]);
-  const [loadingEmergency, setLoadingEmergency] = useState(true);
-  const [loadingActions, setLoadingActions] = useState(true);
-  const [errorEmergency, setErrorEmergency] = useState<string | null>(null);
-  const [errorActions, setErrorActions] = useState<string | null>(null);
+const EmergencyPage = () => {
+  const [sendingAlert, setSendingAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
-  const fetchEmergencyNumber = async () => {
-    setLoadingEmergency(true);
-    setErrorEmergency(null);
-    try {
-      const response = await fetch('/api/dashboard');
-      if (response.ok) {
-        const data = await response.json();
-        setEmergencyNumber(data.emergencyNumber.toString().padStart(2, '0'));
-      } else {
-        setErrorEmergency('Failed to fetch emergency number');
-      }
-    } catch (err) {
-      setErrorEmergency('Error fetching emergency number');
-    } finally {
-      setLoadingEmergency(false);
+  const dialNumber = (number: string) => {
+    window.location.href = `tel:${number}`;
+  };
+
+  const sendLocationAlert = () => {
+    if (!navigator.geolocation) {
+      setAlertMessage("Geolocation is not supported by your browser.");
+      return;
     }
-  };
 
-  const fetchSecurityActions = async () => {
-    setLoadingActions(true);
-    setErrorActions(null);
-    try {
-      const response = await fetch('/api/security-actions');
-      if (response.ok) {
-        const data = await response.json();
-        setSecurityActions(data.actions);
-      } else {
-        setErrorActions('Failed to fetch security actions');
+    setSendingAlert(true);
+    setAlertMessage(null);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          const response = await fetch("/api/emergency-alerts", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ latitude, longitude }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.success) {
+            setAlertMessage("Alert sent to emergency contacts.");
+          } else {
+            setAlertMessage(data.error || "Failed to send alert.");
+          }
+        } catch (error) {
+          setAlertMessage("Error sending alert.");
+        } finally {
+          setSendingAlert(false);
+        }
+      },
+      (error) => {
+        setAlertMessage("Unable to retrieve your location.");
+        setSendingAlert(false);
       }
-    } catch (err) {
-      setErrorActions('Error fetching security actions');
-    } finally {
-      setLoadingActions(false);
-    }
-  };
-
-  React.useEffect(() => {
-    fetchEmergencyNumber();
-    fetchSecurityActions();
-  }, []);
-
-  const handleCallMe = () => {
-    alert(`Calling emergency number: ${emergencyNumber}`);
-  };
-
-  const handleRefreshActions = () => {
-    fetchSecurityActions();
+    );
   };
 
   return (
-    <main className="p-6 max-w-3xl mx-auto font-serif">
-      <h1 className="text-4xl font-bold mb-6 border-b pb-2 border-gray-300">Emergency Management</h1>
+    <div className="min-h-screen w-full p-6 bg-white flex flex-col justify-start max-w-full">
+      <h2 className="text-3xl font-semibold text-black mb-4">Emergency Measures</h2>
 
-      <section className="mb-6">
-        <p className="text-lg">Current Emergency Number:</p>
-        {loadingEmergency ? (
-          <p>Loading emergency number...</p>
-        ) : errorEmergency ? (
-          <p className="text-red-600">{errorEmergency}</p>
-        ) : (
-          <>
-            <p className="text-6xl font-extrabold text-red-700 mb-4">{emergencyNumber}</p>
-            <button
-              onClick={handleCallMe}
-              className="bg-red-600 text-white px-6 py-3 rounded shadow hover:bg-red-700 transition"
-              aria-label="Call emergency number"
-            >
-              Call Me
-            </button>
-          </>
-        )}
-      </section>
-
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-semibold border-b border-gray-300 pb-1">Security Actions Taken</h2>
+      <div className="bg-red-100 rounded-xl p-4 space-y-4 flex-grow">
+        {/* Call Police */}
+        <div className="bg-red-200 rounded-lg p-4">
+          <h3 className="text-xl font-semibold mb-2 text-black">Call Police / Emergency</h3>
           <button
-            onClick={handleRefreshActions}
-            className="text-blue-600 hover:underline text-sm"
-            aria-label="Refresh security actions"
+            onClick={() => dialNumber("100")}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full"
           >
-            Refresh
+            Call Now
           </button>
         </div>
-        {loadingActions ? (
-          <p>Loading security actions...</p>
-        ) : errorActions ? (
-          <p className="text-red-600">{errorActions}</p>
-        ) : securityActions.length === 0 ? (
-          <p>No security actions recorded.</p>
-        ) : (
-          <ul className="space-y-4">
-            {securityActions.map((action) => (
-              <li
-                key={action.id}
-                className={`border p-4 rounded shadow ${
-                  action.takenBy === 'warden' ? 'bg-blue-50 border-blue-400' : 'bg-green-50 border-green-400'
-                }`}
-              >
-                <p className="italic">"{action.description}"</p>
-                <p className="text-sm mt-1">
-                  Taken by:{' '}
-                  <span
-                    className={`font-semibold ${
-                      action.takenBy === 'warden' ? 'text-blue-700' : 'text-green-700'
-                    } capitalize`}
-                  >
-                    {action.takenBy === 'warden' ? 'Hostel Warden' : 'User'}
-                  </span>{' '}
-                  on {new Date(action.timestamp).toLocaleString(undefined, {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </main>
+
+        {/* Emergency Mobility + Broadcast Alert */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-red-200 rounded-lg p-4">
+            <h3 className="text-lg font-semibold mb-2 text-black">Call Emergency Mobility</h3>
+            <button
+              onClick={() => dialNumber("108")}
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full"
+            >
+              Call now
+            </button>
+          </div>
+          <div className="bg-red-200 rounded-lg p-4">
+            <h3 className="text-lg font-semibold mb-2 text-black">Broadcast Alert</h3>
+            <button
+              onClick={sendLocationAlert}
+              disabled={sendingAlert}
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full disabled:opacity-50"
+            >
+              {sendingAlert ? "Sending..." : "Send now"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Actions Taken */}
+      <div className="bg-red-50 rounded-xl p-4 mt-6">
+        <h3 className="text-xl font-semibold mb-4 text-black">Actions Taken</h3>
+        <div className="space-y-3">
+          <div className="bg-red-100 h-8 rounded-md"></div>
+          <div className="bg-red-100 h-8 rounded-md"></div>
+        </div>
+      </div>
+
+      {alertMessage && (
+        <div className="mt-4 p-3 bg-yellow-100 text-yellow-800 rounded">{alertMessage}</div>
+      )}
+    </div>
   );
-}
+};
+
+export default EmergencyPage;

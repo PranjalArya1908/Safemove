@@ -72,13 +72,13 @@ export default function UserTripsPage() {
         body: JSON.stringify({ cause }),
       });
     } catch (error) {
-      console.error('Failed to record emergency cause:', error);
+      console.error('Message sent to contacts', error);
     }
   };
 
   const handleCallHostel = () => {
     recordEmergencyCause('Call Hostel');
-    placeCall('+918077868866')
+    placeCall('+918279454237')
   };
 
   const handleCallPolice = () => {
@@ -94,14 +94,10 @@ export default function UserTripsPage() {
     sendEmail(emergencyEmails, subject, body);
   };
 
-  // Open extend dialog only if allowed
+  // Open extend dialog unconditionally (removed allowedToExtend check)
   const openExtendDialog = (time: number) => {
-    if (allowedToExtend) {
-      setExtendTime(time);
-      setShowExtendDialog(true);
-    } else {
-      alert('Extension not allowed by admin yet.');
-    }
+    setExtendTime(time);
+    setShowExtendDialog(true);
   };
 
   const closeExtendDialog = () => {
@@ -239,7 +235,36 @@ export default function UserTripsPage() {
         <button
           className="w-full bg-[#f2300f] text-white rounded-3xl py-4 text-center text-base font-normal"
           aria-label="Emergency"
-          onClick={handleEmergency}
+          onClick={async () => {
+            try {
+              // Fetch emergency contacts
+              const contactsResponse = await fetch('/api/emergency-contacts');
+              if (!contactsResponse.ok) {
+                alert('Failed to fetch emergency contacts');
+                return;
+              }
+              const contacts = await contactsResponse.json();
+              const phoneNumbers = contacts.map((c: { phone: string }) => c.phone);
+
+              // Send SMS to emergency contacts
+              const smsResponse = await fetch('/api/send-sms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  phoneNumbers,
+                  message: 'Emergency Button Pressed',
+                }),
+              });
+
+              if (smsResponse.ok) {
+                alert('Emergency SMS sent to contacts!');
+              } else {
+                alert('Failed to send emergency SMS');
+              }
+            } catch (error) {
+              alert('Error sending emergency SMS');
+            }
+          }}
         >
           Emergency
         </button>

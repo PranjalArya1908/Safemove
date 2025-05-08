@@ -279,7 +279,28 @@ export default function AdminPage() {
             <section
               className="border border-gray-300 rounded-2xl p-6 min-h-[200px] text-base font-normal text-[#000000] overflow-y-auto"
             >
-              <h2 className="font-bold mb-4">Alert Notifications</h2>
+            <section
+              className="col-span-2 border border-gray-300 rounded-2xl p-6 min-h-[200px] text-base font-normal text-[#000000] overflow-y-auto"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Alert Notifications</h3>
+                <div>
+                  <button
+                    onClick={fetchNotifications}
+                    className="text-blue-600 hover:underline text-sm mr-4"
+                    aria-label="Refresh notifications"
+                  >
+                    Refresh
+                  </button>
+                  <button
+                    onClick={() => setShowAllNotifications(!showAllNotifications)}
+                    className="text-blue-600 hover:underline text-sm"
+                    aria-label={showAllNotifications ? "Show pending notifications" : "Show all notifications"}
+                  >
+                    {showAllNotifications ? "Show Pending" : "Show All"}
+                  </button>
+                </div>
+              </div>
               {loadingNotifications ? (
                 <p>Loading notifications...</p>
               ) : errorNotifications ? (
