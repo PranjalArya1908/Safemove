@@ -184,7 +184,7 @@ export default function AdminPage() {
   return (
     <main className="colour-black">
       <div className="bg-white min-h-screen p-6 relative">
-        <div className={`${showModal ? 'blur-sm pointer-events-none select-none' : ''}`}>
+        <div className={showModal ? 'blur-sm pointer-events-none select-none' : ''}>
           <header className="flex flex-wrap items-center justify-between mb-8">
             <button
               className="text-black font-semibold text-base rounded-full border border-[#5B6FFB] px-6 py-2"
@@ -193,9 +193,7 @@ export default function AdminPage() {
               SafeMove
             </button>
             <nav>
-              <ul
-                className="flex items-center space-x-6 bg-[#E3E3E3] rounded-full px-6 py-2 text-sm font-normal"
-              >
+              <ul className="flex items-center space-x-6 bg-[#E3E3E3] rounded-full px-6 py-2 text-sm font-normal">
                 <li>
                   <Link href="/admin" legacyBehavior>
                     <a className="text-[#5B6FFB] font-normal leading-5">Dashboard</a>
@@ -234,7 +232,7 @@ export default function AdminPage() {
             </div>
           )}
 
-          <main className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <section
               className="col-span-2 border border-gray-300 rounded-2xl p-6 min-h-[200px] text-base font-normal text-[#000000] overflow-y-auto"
             >
@@ -263,15 +261,15 @@ export default function AdminPage() {
                     ))}
                   </ul>
                 )}
-                {selectedStudent && (
-                  <div className="mt-4">
-                    <Link href={`/admin/trips?preselectedStudentId=${selectedStudent.id}`} passHref legacyBehavior>
-                      <a className="inline-block bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors text-center whitespace-nowrap">
-                        Plan the trip
-                      </a>
-                    </Link>
-                  </div>
-                )}
+          {selectedStudent && (
+            <div className="mt-4">
+              <Link href={`/admin/trips?preselectedStudentId=${selectedStudent.id}`} passHref legacyBehavior>
+                <a className="inline-block bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors text-center whitespace-nowrap">
+                  Plan the trip
+                </a>
+              </Link>
+            </div>
+          )}
               </div>
 
             </section>
@@ -279,6 +277,7 @@ export default function AdminPage() {
             <section
               className="border border-gray-300 rounded-2xl p-6 min-h-[200px] text-base font-normal text-[#000000] overflow-y-auto"
             >
+            </section>
             <section
               className="col-span-2 border border-gray-300 rounded-2xl p-6 min-h-[200px] text-base font-normal text-[#000000] overflow-y-auto"
             >
@@ -429,7 +428,7 @@ export default function AdminPage() {
             >
               <PendingExtensionRequests />
             </section>
-          </main>
+          </div>
         </div>
 
         {showModal && (
@@ -542,11 +541,11 @@ export default function AdminPage() {
                     <span className="text-lg text-gray-700 capitalize">{selectedStudent.status}</span>
                   </div>
                   <div className="mt-6">
-                    <Link href={`/admin/trips?preselectedStudentId=${selectedStudent.id}`} passHref legacyBehavior>
-                      <a className="inline-block bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors text-center whitespace-nowrap">
-                        Plan the trip
-                      </a>
-                    </Link>
+                  <Link href={`/admin/trips?preselectedStudentId=${selectedStudent.id}`} passHref legacyBehavior>
+                    <a className="inline-block bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors text-center whitespace-nowrap">
+                      Plan the trip
+                    </a>
+                  </Link>
                   </div>
                 </div>
               </div>
