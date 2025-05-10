@@ -14,6 +14,9 @@ export default function UserTripsPage() {
   const [allowedToExtend, setAllowedToExtend] = useState(false); // New state to control if extension allowed
   const timerIntervalRef = useRef<number | null>(null);
 
+  // Placeholder studentId, replace with actual user id from auth/session
+  const studentId = 1;
+
   useEffect(() => {
     if (durationHoursParam) {
       const duration = parseInt(durationHoursParam, 10);
@@ -47,6 +50,46 @@ export default function UserTripsPage() {
       }
     };
   }, []);
+
+  // New useEffect to watch and send geolocation updates
+  useEffect(() => {
+    if (!('geolocation' in navigator)) {
+      console.error('Geolocation is not supported by this browser.');
+      return;
+    }
+
+    const successCallback = async (position: GeolocationPosition) => {
+      const { latitude, longitude } = position.coords;
+      try {
+        const response = await fetch(`/api/students/${studentId}/location`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ latitude, longitude }),
+        });
+        if (!response.ok) {
+          console.error('Failed to update location:', await response.text());
+        }
+      } catch (error) {
+        console.error('Error sending location update:', error);
+      }
+    };
+
+    const errorCallback = (error: GeolocationPositionError) => {
+      console.error('Error getting geolocation:', error.message);
+    };
+
+    const watchId = navigator.geolocation.watchPosition(successCallback, errorCallback, {
+      enableHighAccuracy: true,
+      maximumAge: 10000,
+      timeout: 5000,
+    });
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, [studentId]);
 
   // Function to place a call using tel: link
   const placeCall = (phoneNumber: string) => {

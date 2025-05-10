@@ -1,3 +1,4 @@
+'use client'
 import React, { useState } from "react";
 
 const SettingsPanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {

@@ -54,13 +54,13 @@ export default function UserPage() {
               router.push(`/user/trips?durationHours=${parsed.durationHours}`);
 
               // Initialize socket connection and start sending location updates
-              if (!socketRef.current) {
-                socketRef.current = io();
-                socketRef.current.on('connect', () => {
-                  console.log('Socket connected:', socketRef.current?.id);
-                  socketRef.current?.emit('joinSession', parsed.content);
-                });
-              }
+                if (!socketRef.current) {
+                  socketRef.current = io('/api/socket', { path: '/api/socket' });
+                  socketRef.current.on('connect', () => {
+                    console.log('Socket connected:', socketRef.current?.id);
+                    socketRef.current?.emit('joinSession', parsed.content);
+                  });
+                }
 
               if (navigator.geolocation) {
                 if (watchIdRef.current !== null) {

@@ -87,39 +87,39 @@ export default function PendingExtensionRequests() {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4 text-[#000000]">Pending Extension Requests</h1>
+    <div className="max-w-4xl mx-auto p-1">
+      <h1 className="text-xl font-bold tracking-tighter mb-4 text-[#000000]">Pending Extension Requests</h1>
       {requests.length === 0 ? (
         <p className='text-[#000000]'>No pending extension requests.</p>
       ) : (
-        <table className="w-full text-[#000000] border-collapse border border-gray-300">
+        <table className="w-full text-[#000000] text-sm  border-collapse border border-gray-300">
           <thead>
             <tr>
-              <th className="border text-[#000000] border-gray-300 p-2">Student</th>
-              <th className="border text-[#000000] border-gray-300 p-2">Extend Minutes</th>
-              <th className="border text-[#000000] border-gray-300 p-2">Message</th>
-              <th className="border text-[#000000] border-gray-300 p-2">Requested At</th>
-              <th className="border text-[#000000] border-gray-300 p-2">Actions</th>
+              <th className="border text-[#000000] border-gray-300 p-2 tracking-tighter ">Student</th>
+              <th className="border text-[#000000] border-gray-300 p-2 tracking-tighter">Extend Minutes</th>
+              <th className="border text-[#000000] border-gray-300 p-2 tracking-tighter">Message</th>
+              <th className="border text-[#000000] border-gray-300 p-2 tracking-tighter">Requested At</th>
+              <th className="border text-[#000000] border-gray-300 p-2 tracking-tighter ">Actions</th>
             </tr>
           </thead>
           <tbody>
             {requests.map((req) => (
               <tr key={req.id}>
-                <td className="border border-gray-300 p-2">{req.student_name}</td>
-                <td className="border border-gray-300 p-2 text-center">{req.extend_minutes}</td>
-                <td className="border border-gray-300 p-2">{req.personal_message || '-'}</td>
-                <td className="border border-gray-300 p-2">{new Date(req.created_at).toLocaleString()}</td>
-                <td className="border border-gray-300 p-2 text-center space-x-2">
+                <td className="border border-gray-300 p-2 text-[1vw]">{req.student_name}</td>
+                <td className="border border-gray-300 p-2 text-[1vw] text-center">{req.extend_minutes}</td>
+                <td className="border border-gray-300 p-2 text-[1vw]">{req.personal_message || '-'}</td>
+                <td className="border border-gray-300 p-2 text-[1vw]">{new Date(req.created_at).toLocaleString()}</td>
+                <td className="border border-gray-300 p-2 text-[1vw] text-center space-x-2">
                   <button
                     disabled={updatingId === req.id}
-                    className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 disabled:opacity-50"
+                    className="bg-green-500 text-white px-3 py-1 m-1 rounded-md hover:bg-green-600 disabled:opacity-50"
                     onClick={() => handleAction(req.id, 'approve')}
                   >
                     Approve
                   </button>
                   <button
                     disabled={updatingId === req.id}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 disabled:opacity-50"
+                    className="bg-red-500 text-white px-4 py-1 rounded-md hover:bg-red-600 disabled:opacity-50"
                     onClick={() => handleAction(req.id, 'reject')}
                   >
                     Reject

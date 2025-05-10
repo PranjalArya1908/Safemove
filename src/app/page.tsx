@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import Link from 'next/link'; // Adjust the import path as necessary
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import Link from "next/link"; // Adjust the import path as necessary
+
 export default function LandingPage() {
   const [adminHover, setAdminHover] = useState(false);
   const [userHover, setUserHover] = useState(false);
@@ -13,11 +14,11 @@ export default function LandingPage() {
     <main className="bg-[#FFFCF8] min-h-screen text-center font-sans overflow-hidden relative">
       {/* Animated Background Glow */}
       <motion.img
-        src="C:\Users\DELL\safemove\public\gloww.png"
+        src="/gloww.png"
         alt="Background Glow"
         initial={{ opacity: 0.5, scale: 1 }}
         animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.1, 1] }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         className="absolute top-[-100px] left-[-100px] w-[600px] h-[600px] z-0 pointer-events-none"
       />
 
@@ -51,7 +52,7 @@ export default function LandingPage() {
           transition={{ delay: 0.4, duration: 0.6 }}
           className="text-4xl md:text-6xl font-bold leading-15.5 max-w-xl text-[#000000] tracking-tighter"
         >
-          Now women’s move safe with{' '}
+          Now women’s move safe with{" "}
           <span className="bg-gradient-to-r from-blue-500 to-blue-700 text-transparent bg-clip-text tracking-tighter">
             SafeMove
           </span>
@@ -65,41 +66,30 @@ export default function LandingPage() {
         >
           SafeMove empowers women to travel with confidence, knowing help is just a tap away. With real-time tracking and smart safety features, every journey becomes safer and more secure.
         </motion.p>
-         
-         <div className='flex flex-row gap-3'>
 
-         <motion.button
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.8, duration: 0.5 }}
-          className="mt-8 bg-gradient-to-r from-blue-500 to-blue-700 text-white px-8 py-2 text-sm rounded-full shadow-xl hover:shadow-2xl transition-all tracking-tighter"
-          onClick={() => router.push('/admin')}
-        >
-          Admin
-        </motion.button>
-        <motion.button
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.8, duration: 0.5 }}
-          className="mt-8 bg-gradient-to-r from-blue-500 to-blue-700 text-white px-8 py-2 text-sm rounded-full shadow-xl hover:shadow-2xl transition-all tracking-tighter"
-          onClick={() => router.push('/user')}
-        >
-          Student
-        </motion.button>
-
-         </div>
-        
+        <div className="flex flex-row gap-3">
+          <motion.button
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
+            className="mt-8 bg-gradient-to-r from-blue-500 to-blue-700 text-white px-8 py-2 text-sm rounded-full shadow-xl hover:shadow-2xl transition-all tracking-tighter"
+            onClick={() => router.push("/admin")}
+          >
+            Admin
+          </motion.button>
+          <motion.button
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
+            className="mt-8 bg-gradient-to-r from-blue-500 to-blue-700 text-white px-8 py-2 text-sm rounded-full shadow-xl hover:shadow-2xl transition-all tracking-tighter"
+            onClick={() => router.push("/user")}
+          >
+            Student
+          </motion.button>
+        </div>
       </section>
 
-      @media-query (max-width: 600px) and (min-width: 300px) {
-
-        
-      }
-
-
-
-   
+      @media-query (max-width: 600px) and (min-width: 300px) {}
     </main>
-   
   );
 }

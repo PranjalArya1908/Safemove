@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PendingExtensionRequests from '@/components/PendingExtensionRequests';
-
+// import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 export default function AdminPage() {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -187,13 +188,13 @@ export default function AdminPage() {
         <div className={showModal ? 'blur-sm pointer-events-none select-none' : ''}>
           <header className="flex flex-wrap items-center justify-between mb-8">
             <button
-              className="text-black font-semibold text-base rounded-full border border-[#5B6FFB] px-6 py-2"
+              className="text-blue-600 font-md tracking-tighter text-base rounded-full border border-[#5B6FFB] px-6 py-2"
               type="button"
             >
               SafeMove
             </button>
             <nav>
-              <ul className="flex items-center space-x-6 bg-[#E3E3E3] rounded-full px-6 py-2 text-sm font-normal">
+              <ul className="flex items-center space-x-6 bg-[#e6e6e6] rounded-full px-6 py-3 text-sm font-normal">
                 <li>
                   <Link href="/admin" legacyBehavior>
                     <a className="text-[#5B6FFB] font-normal leading-5">Dashboard</a>
@@ -201,7 +202,7 @@ export default function AdminPage() {
                 </li>
                 <li>
                   <Link href="/admin/students" legacyBehavior>
-                    <a className="text-black font-normal leading-5">Students</a>
+                    <a className="text-black font-normal leading-5 ">Students</a>
                   </Link>
                 </li>
                 <li>
@@ -218,7 +219,7 @@ export default function AdminPage() {
             </nav>
             <button
               type="button"
-              className="flex items-center space-x-2 bg-[#5B6FFB] text-white rounded-full px-6 py-3 text-sm font-normal"
+              className="flex items-center space-x-2 bg-[#4e63ff] text-white rounded-full px-5 py-3 text-sm font-normal"
               onClick={() => setShowModal(true)}
             >
               <span>Add Student</span>
@@ -233,273 +234,285 @@ export default function AdminPage() {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <section
-              className="col-span-2 border border-gray-300 rounded-2xl p-6 min-h-[200px] text-base font-normal text-[#000000] overflow-y-auto"
-            >
-              <div className="mb-4">
-                <h2 className="text-3xl font-bold mb-4">
-                  <span className="text-black">Lets </span>
-                  <span className="text-blue-600">Plan The trip</span>
-                </h2>
-                <input
-                  type="text"
-                  placeholder="Search students..."
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  className="w-full border border-gray-300 rounded-full px-3 py-2 text-[#000000] focus:outline-none focus:ring-2 focus:ring-[#5B6FFB]"
-                />
-                {searchResults.length > 0 && (
-                  <ul className="border border-gray-300 rounded mt-2 max-h-48 overflow-y-auto bg-white text-black">
-                    {searchResults.map((student) => (
-                      <li
-                        key={student.id}
-                        className="p-2 cursor-pointer hover:bg-gray-200"
-                        onClick={() => setSelectedStudent(student)}
-                      >
-                        {student.name} - {student.phone}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-          {selectedStudent && (
-            <div className="mt-4">
-              <Link href={`/admin/trips?preselectedStudentId=${selectedStudent.id}`} passHref legacyBehavior>
-                <a className="inline-block bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors text-center whitespace-nowrap">
-                  Plan the trip
-                </a>
-              </Link>
-            </div>
-          )}
-              </div>
 
-            </section>
+<section
+  className="col-span-2 border border-gray-200 rounded-2xl p-6 min-h-[200px] bg-white shadow-md overflow-y-auto"
+>
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+    className="mb-4"
+  >
+    <h2 className="text-5xl tracking-tighter font-bold mt-2 mb-4">
+      <span className="text-black">Let's </span>
+      <span className="text-blue-600">Plan the trip</span>
+    </h2>
 
-            <section
-              className="border border-gray-300 rounded-2xl p-6 min-h-[200px] text-base font-normal text-[#000000] overflow-y-auto"
-            >
-            </section>
-            <section
-              className="col-span-2 border border-gray-300 rounded-2xl p-6 min-h-[200px] text-base font-normal text-[#000000] overflow-y-auto"
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Alert Notifications</h3>
-                <div>
+    <motion.input
+      type="text"
+      placeholder="Search students..."
+      value={searchQuery}
+      onChange={handleSearchChange}
+      className="w-lg border border-gray-300 rounded-full px-6 py-3 mt-1 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+      whileFocus={{ scale: 1.02 }}
+    />
+
+    {searchResults.length > 0 && (
+      <motion.ul
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="border border-gray-200 rounded-lg mt-3 max-h-48 overflow-y-auto bg-white text-black shadow-sm"
+      >
+        {searchResults.map((student, index) => (
+          <motion.li
+            key={student.id}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.05 }}
+            className="p-3 cursor-pointer hover:bg-gray-100 transition-colors"
+            onClick={() => setSelectedStudent(student)}
+          >
+            {student.name} - {student.phone}
+          </motion.li>
+        ))}
+      </motion.ul>
+    )}
+
+    {selectedStudent && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="mt-4"
+      >
+        <Link href={`/admin/trips?preselectedStudentId=${selectedStudent.id}`} passHref legacyBehavior>
+          <a className="inline-block bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors text-center whitespace-nowrap">
+            Plan the trip
+          </a>
+        </Link>
+      </motion.div>
+    )}
+  </motion.div>
+</section>
+
+
+          
+      
+{/* Alert section  */}
+<motion.section
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5, ease: "easeOut" }}
+  className="col-span-1 border border-gray-300 rounded-2xl p-6 min-h-[200px] text-base font-normal text-[#000000] bg-white shadow-sm"
+>
+  <div className="flex justify-between items-center mb-4">
+    <h3 className="text-xl font-bold tracking-tight text-[#000000]">Alert Notifications</h3>
+    <div className="flex gap-3">
+      <button
+        onClick={fetchNotifications}
+        className="text-sm text-blue-600 hover:underline transition-all"
+        aria-label="Refresh notifications"
+      >
+        Refresh
+      </button>
+      <button
+        onClick={() => setShowAllNotifications(!showAllNotifications)}
+        className="text-sm text-blue-600 hover:underline transition-all"
+        aria-label={showAllNotifications ? "Show pending notifications" : "Show all notifications"}
+      >
+        {showAllNotifications ? "Show Pending" : "Show All"}
+      </button>
+    </div>
+  </div>
+
+  {loadingNotifications ? (
+    <p>Loading notifications...</p>
+  ) : errorNotifications ? (
+    <p className="text-red-600">{errorNotifications}</p>
+  ) : filteredNotifications.length === 0 ? (
+    <p className="text-gray-500">No notifications available.</p>
+  ) : (
+    <ul className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+      <AnimatePresence>
+        {filteredNotifications.map((notif) => (
+          <motion.li
+            key={notif.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            layout
+            className="border border-gray-300 rounded-lg p-3 bg-[#FAFAFA] shadow-sm flex flex-col space-y-2"
+          >
+            <p className="text-sm">{notif.message}</p>
+            <div className="flex items-center space-x-2">
+              {!showAllNotifications && (
+                <>
                   <button
-                    onClick={fetchNotifications}
-                    className="text-blue-600 hover:underline text-sm mr-4"
-                    aria-label="Refresh notifications"
+                    onClick={() => updateNotificationStatus(notif.id, 'approved')}
+                    disabled={notif.status === 'approved'}
+                    className={`px-3 py-1 rounded text-white text-xs transition-all ${
+                      notif.status === 'approved'
+                        ? 'bg-green-400 cursor-not-allowed'
+                        : 'bg-green-600 hover:bg-green-700'
+                    }`}
+                    aria-label="Approve notification"
                   >
-                    Refresh
+                    ✅
                   </button>
                   <button
-                    onClick={() => setShowAllNotifications(!showAllNotifications)}
-                    className="text-blue-600 hover:underline text-sm"
-                    aria-label={showAllNotifications ? "Show pending notifications" : "Show all notifications"}
+                    onClick={() => updateNotificationStatus(notif.id, 'disapproved')}
+                    disabled={notif.status === 'disapproved'}
+                    className={`px-3 py-1 rounded text-white text-xs transition-all ${
+                      notif.status === 'disapproved'
+                        ? 'bg-red-400 cursor-not-allowed'
+                        : 'bg-red-600 hover:bg-red-700'
+                    }`}
+                    aria-label="Disapprove notification"
                   >
-                    {showAllNotifications ? "Show Pending" : "Show All"}
+                    ❌
                   </button>
-                </div>
-              </div>
-              {loadingNotifications ? (
-                <p>Loading notifications...</p>
-              ) : errorNotifications ? (
-                <p className="text-red-600">{errorNotifications}</p>
-              ) : filteredNotifications.length === 0 ? (
-                <p>No notifications available.</p>
-              ) : (
-                <ul className="space-y-3 max-h-[300px] overflow-y-auto">
-                  {filteredNotifications.map((notif) => (
-                    <li
-                      key={notif.id}
-                      className="border border-gray-300 rounded p-3 flex flex-col space-y-2"
-                    >
-                      <p>{notif.message}</p>
-                      <div className="flex space-x-2">
-                        {!showAllNotifications && (
-                          <>
-                            <button
-                              onClick={() => updateNotificationStatus(notif.id, 'approved')}
-                              disabled={notif.status === 'approved'}
-                              className={`px-3 py-1 rounded text-white ${
-                                notif.status === 'approved' ? 'bg-green-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
-                              }`}
-                              aria-label="Approve notification"
-                            >
-                              &#10003;
-                            </button>
-                            <button
-                              onClick={() => updateNotificationStatus(notif.id, 'disapproved')}
-                              disabled={notif.status === 'disapproved'}
-                              className={`px-3 py-1 rounded text-white ${
-                                notif.status === 'disapproved' ? 'bg-red-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'
-                              }`}
-                              aria-label="Disapprove notification"
-                            >
-                              &#10007;
-                            </button>
-                          </>
-                        )}
-                        <span
-                          className={`ml-auto font-semibold capitalize ${
-                            notif.status === 'approved' ? 'text-green-700' : notif.status === 'disapproved' ? 'text-red-700' : 'text-gray-700'
-                          }`}
-                        >
-                          {notif.status}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                </>
               )}
-            </section>
-
-            <section className="col-span-2 grid grid-cols-2 gap-6">
-              <div
-                className="border border-gray-300 rounded-2xl p-6 relative flex flex-col justify-between"
+              <span
+                className={`ml-auto text-xs font-semibold capitalize ${
+                  notif.status === 'approved'
+                    ? 'text-green-600'
+                    : notif.status === 'disapproved'
+                    ? 'text-red-600'
+                    : 'text-gray-600'
+                }`}
               >
-                <div>
-                  <p className="text-xs font-extrabold text-gray-400 uppercase leading-4 ">
-                    Number of<br />
-                    <span className="text-gray-400 font-extrabold ">Students out</span>
-                  </p>
-                  <h2 className="text-5xl font-extrabold text-[#5B6FFB] mt-2">{studentsOut}</h2>
-                </div>
-                <div
-                  className="absolute top-6 right-6 bg-[#E3E3E3] rounded-full w-10 h-10 flex items-center justify-center text-[#5B6FFB]"
-                >
-                  <i className="fas fa-arrow-up"></i>
-                </div>
-              </div>
+                {notif.status}
+              </span>
+            </div>
+          </motion.li>
+        ))}
+      </AnimatePresence>
+    </ul>
+  )}
+</motion.section>
 
-              <div
-                className="border border-gray-300 rounded-2xl p-6 relative flex flex-col justify-between"
-              >
-                <div>
-                  <p className="text-xs font-extrabold text-gray-400 uppercase leading-4">
-                    Number of<br />
-                    <span className="text-gray-400 font-extrabold">Students in</span>
-                  </p>
-                  <h2 className="text-5xl font-extrabold text-[#5B6FFB] mt-2">{studentsIn}</h2>
-                </div>
-                <div
-                  className="absolute top-6 right-6 bg-[#E3E3E3] rounded-full w-10 h-10 flex items-center justify-center text-[#5B6FFB]"
-                >
-                  <i className="fas fa-arrow-up"></i>
-                </div>
-              </div>
+{/* 4 dashboard  */}
+<section className="col-span-2 grid grid-cols-2 gap-6">
+  {[ 
+    { label: 'Students out', value: studentsOut },
+    { label: 'Students in', value: studentsIn },
+    { label: 'Total trip Completed', value: totalTrips },
+    { label: 'Emergency Number', value: emergencyNumber.toString().padStart(2, '0') }
+  ].map((item, index) => (
+    <motion.div
+      key={index}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1 }}
+      whileHover={{ scale: 1.02 }}
+      className="border border-gray-200 rounded-2xl p-6 relative flex flex-col justify-between bg-white shadow-sm"
+    >
+      <div>
+        <p className="text-[10px] font-semibold text-gray-500 uppercase leading-4">
+          {item.label.split(' ')[0]}<br />
+          <span className="text-gray-400 font-bold">{item.label.split(' ').slice(1).join(' ')}</span>
+        </p>
+        <h2 className="text-5xl font-extrabold text-[#4B5DFB] mt-3">{item.value}</h2>
+      </div>
+      <div className="absolute top-5 right-5 bg-[#F0F0F0] rounded-full w-9 h-9 flex items-center justify-center text-[#4B5DFB]">
+        <i className="fas fa-arrow-up text-sm"></i>
+      </div>
+    </motion.div>
+  ))}
+</section>
 
-              <div
-                className="border border-gray-300 rounded-2xl p-6 relative flex flex-col justify-between"
-              >
-                <div>
-                  <p className="text-xs font-extrabold text-gray-400 uppercase leading-4">
-                    Total trip<br />
-                    <span className="text-gray-400 font-extrabold">Completed</span>
-                  </p>
-                  <h2 className="text-5xl font-extrabold text-[#5B6FFB] mt-2">{totalTrips}</h2>
-                </div>
-                <div
-                  className="absolute top-6 right-6 bg-[#E3E3E3] rounded-full w-10 h-10 flex items-center justify-center text-[#5B6FFB]"
-                >
-                  <i className="fas fa-arrow-up"></i>
-                </div>
-              </div>
-
-              <div
-                className="border border-gray-300 rounded-2xl p-6 relative flex flex-col justify-between"
-              >
-                <div>
-                  <p className="text-xs font-extrabold text-gray-400 uppercase leading-4">
-                    Emergency<br />
-                    <span className="text-gray-400 font-extrabold">Number</span>
-                  </p>
-                  <h2 className="text-5xl font-extrabold text-[#5B6FFB] mt-2">{emergencyNumber.toString().padStart(2, '0')}</h2>
-                </div>
-                <div
-                  className="absolute top-6 right-6 bg-[#E3E3E3] rounded-full w-10 h-10 flex items-center justify-center text-[#5B6FFB]"
-                >
-                  <i className="fas fa-arrow-up"></i>
-                </div>
-              </div>
-            </section>
-
-            <section
-              className="border border-gray-300 rounded-2xl p-6 min-h-[300px] flex flex-col"
-            >
+           <motion.section
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.5, ease: "easeOut" }}
+           className="col-span-1 border border-gray-300 rounded-2xl p-6 min-h-[200px] text-base font-normal text-[#000000] bg-white shadow-sm"
+>
               <PendingExtensionRequests />
-            </section>
+            </motion.section>
           </div>
         </div>
 
         {showModal && (
-          <>
-            <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40"></div>
-            <div className="fixed inset-0 flex items-center justify-center z-50">
-              <form
-                onSubmit={handleSubmit}
-                className="bg-white rounded-lg p-8 w-full max-w-md shadow-lg relative z-50"
-              >
-                <h2 className="text-2xl font-bold mb-6 text-[#000000]">Add Student</h2>
-                <div className="mb-4">
-                  <label htmlFor="name" className="block mb-1 font-semibold text-[#000000] ">
-                    Name
-                  </label>
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-[#000000] focus:outline-none  focus:ring-2 focus:ring-[#5B6FFB]"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="phone" className="block mb-1 font-semibold text-[#000000]">
-                    Phone Number
-                  </label>
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full border text-[#000000] border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#5B6FFB]"
-                  />
-                </div>
-                <div className="mb-6">
-                  <label htmlFor="image" className="block mb-1 font-semibold text-[#000000]">
-                    Image
-                  </label>
-                  <input
-                    id="image"
-                    name="image"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleInputChange}
-                    className="w-full text-[#000000]"
-                  />
-                </div>
-                <div className="flex justify-end space-x-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="px-4 py-2 rounded border border-gray-300 hover:bg-gray-100 text-[#000000]"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded bg-[#5B6FFB] text-white hover:bg-[#4a5edb]"
-                  >
-                    Add
-                  </button>
-                </div>
-              </form>
-            </div>
-          </>
-        )}
+  <>
+    <div className="fixed inset-0 bg-blue-200 bg-opacity-40 backdrop-blur-sm z-40"></div>
+    <div className="fixed inset-0 flex items-center justify-center z-50 px-4">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-xl relative z-50"
+      >
+        <h2 className="text-3xl font-bold mb-6 text-[#5B6FFB]">Add a new student</h2>
+
+        {/* Name Field */}
+        <div className="mb-4">
+          <label htmlFor="name" className="block mb-2 text-sm font-semibold text-gray-700">
+            Name
+          </label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            value={formData.name}
+            onChange={handleInputChange}
+            required
+            placeholder="Enter your name"
+            className="w-full px-4 py-3 bg-[#F1F4FF] rounded-xl text-gray-800 placeholder-gray-500 outline-none focus:ring-2 focus:ring-[#5B6FFB]"
+          />
+        </div>
+
+        {/* Phone Field */}
+        <div className="mb-4">
+          <label htmlFor="phone" className="block mb-2 text-sm font-semibold text-gray-700">
+            Phone Number
+          </label>
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            value={formData.phone}
+            onChange={handleInputChange}
+            required
+            placeholder="Enter your contact number"
+            className="w-full px-4 py-3 bg-[#F1F4FF] rounded-xl text-gray-800 placeholder-gray-500 outline-none focus:ring-2 focus:ring-[#5B6FFB]"
+          />
+        </div>
+
+        {/* Image Upload */}
+        <div className="mb-6">
+          <label htmlFor="image" className="block mb-2 text-sm font-semibold text-gray-700">
+            Passport Size Photo
+          </label>
+          <input
+            id="image"
+            name="image"
+            type="file"
+            accept="image/*"
+            onChange={handleInputChange}
+            className="w-full px-4 py-2 bg-[#F1F4FF] rounded-xl text-gray-800 outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#5B6FFB] file:text-white hover:file:bg-[#4a5edb]"
+          />
+        </div>
+
+        {/* Buttons */}
+        <div className="flex justify-between mt-6">
+          <button
+            type="button"
+            onClick={() => setShowModal(false)}
+            className="px-6 py-2 rounded-full border border-[#5B6FFB] text-[#5B6FFB] hover:bg-[#f1f4ff] transition-all"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-6 py-2 rounded-full bg-[#5B6FFB] text-white hover:bg-[#4a5edb] transition-all"
+          >
+            Add student
+          </button>
+        </div>
+      </form>
+    </div>
+  </>
+)}
 
       {selectedStudent && (
         <>

@@ -46,9 +46,10 @@ export default function AdminStudentsPage() {
 
   return (
     <main className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">Students</h1>
+      <h1 className="text-3xl text-[#000000] font-bold mb-6">Students</h1>
       <Link href="/admin" legacyBehavior>
-        <a className="text-blue-600 underline mb-4 inline-block">Back to Dashboard</a>
+      <button>
+        <a className="text-blue-600 underline mb-4 inline-block">Back to Dashboard</a></button>
       </Link>
 
       {error && <p className="text-red-600 mb-4">{error}</p>}

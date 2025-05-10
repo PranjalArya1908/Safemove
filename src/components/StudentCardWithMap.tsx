@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { io, Socket } from "socket.io-client";
 
 type StudentCardWithMapProps = {
@@ -26,6 +27,7 @@ const StudentCardWithMap = ({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const [tracking, setTracking] = useState(false);
+  const firstUpdateRef = useRef(true);
 
   useEffect(() => {
     if (!tracking) {
@@ -38,6 +40,7 @@ const StudentCardWithMap = ({
         mapRef.current.remove();
         mapRef.current = null;
       }
+      firstUpdateRef.current = true;
       return;
     }
 
@@ -50,7 +53,7 @@ const StudentCardWithMap = ({
     }).addTo(mapRef.current);
 
     // Initialize socket.io client
-    socketRef.current = io();
+    socketRef.current = io('/api/socket', { path: '/api/socket' });
 
     socketRef.current.on("connect", () => {
       console.log(`StudentCardWithMap: connected to socket with id ${socketRef.current?.id}`);
@@ -73,7 +76,15 @@ const StudentCardWithMap = ({
         } else {
           markerRef.current = L.marker([latitude, longitude]).addTo(mapRef.current);
         }
-        mapRef.current.setView([latitude, longitude], 13);
+        // Pinpoint the location with a popup showing "User Location"
+        if (markerRef.current) {
+          markerRef.current.bindPopup("User Location").openPopup();
+        }
+        // Only set view on first update to avoid jarring map movements
+        if (firstUpdateRef.current) {
+          mapRef.current.setView([latitude, longitude], 13);
+          firstUpdateRef.current = false;
+        }
       }
     });
 
@@ -86,6 +97,7 @@ const StudentCardWithMap = ({
         mapRef.current.remove();
         mapRef.current = null;
       }
+      firstUpdateRef.current = true;
     };
   }, [tracking, sessionId]);
 
@@ -95,6 +107,26 @@ const StudentCardWithMap = ({
 
   // Determine dot color based on status
   const statusDotColor = status === "inside hostel" ? "bg-green-500" : "bg-red-500";
+
+  // Function to end trip and update status to "inside hostel"
+  const endTrip = async () => {
+    try {
+      const response = await fetch(`/api/students/${studentId}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'inside hostel' }),
+      });
+      if (response.ok) {
+        alert('Trip ended successfully.');
+        // Optionally update UI or state here
+      } else {
+        const data = await response.json();
+        alert('Failed to end trip: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      alert('Error ending trip: ' + error);
+    }
+  };
 
   return (
     <div className="student-card border rounded-lg p-4 mb-4 bg-white shadow-md flex space-x-4 items-center">
@@ -108,7 +140,7 @@ const StudentCardWithMap = ({
       <div className="flex-1">
         <div className="flex items-center space-x-2 mb-1">
           <span className={`w-4 h-4 rounded-full inline-block ${statusDotColor}`} aria-label={status}></span>
-          <h3 className="text-lg font-semibold">{studentName}</h3>
+          <h3 className="text-lg text-[#000000] font-semibold">{studentName}</h3>
         </div>
         {phoneNumber && <p className="text-sm text-gray-600">{phoneNumber}</p>}
         <button
@@ -117,6 +149,14 @@ const StudentCardWithMap = ({
         >
           {tracking ? "Stop Tracking" : "Track Location"}
         </button>
+        {status !== "inside hostel" && (
+          <button
+            onClick={endTrip}
+            className="mt-2 ml-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+          >
+            End Trip
+          </button>
+        )}
         <div className="map-wrapper mt-2 rounded overflow-hidden" style={{ height: tracking ? "200px" : "0", width: "100%", transition: "height 0.3s ease" }}>
           <div
             ref={mapContainerRef}
