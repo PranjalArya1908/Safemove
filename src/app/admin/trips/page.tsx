@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import QRCode from 'react-qr-code';
+import { motion } from 'framer-motion';
 import StudentCardWithMap from '../../../components/StudentCardWithMap';
 
 export default function AdminTripsPage() {
@@ -15,6 +16,23 @@ export default function AdminTripsPage() {
   const [showStudentSelector, setShowStudentSelector] = useState(false);
 
   const [timeMinutes, setTimeMinutes] = useState(40);
+
+  // Update trip time for selected students
+  useEffect(() => {
+    if (selectedStudents.length === 0) return;
+
+    selectedStudents.forEach(async (studentId) => {
+      try {
+        await fetch('/api/trip-time', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentId, time: timeMinutes }),
+        });
+      } catch (error) {
+        console.error('Error updating trip time:', error);
+      }
+    });
+  }, [timeMinutes, selectedStudents]);
 
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
@@ -43,21 +61,18 @@ export default function AdminTripsPage() {
       try {
         const response = await fetch(`/api/students?name=${encodeURIComponent(searchTerm)}`);
         const data = await response.json();
-        // Assuming API returns sessionId and status for each student
         setStudents(data.students || []);
       } catch (error) {
         console.error('Error fetching students:', error);
       }
     };
 
-    // Fetch students when searchTerm changes, with debounce
     const debounceTimeout = setTimeout(() => {
       fetchStudents();
     }, 300);
 
     return () => clearTimeout(debounceTimeout);
   }, [searchTerm, showStudentSelector]);
-
 
   const toggleStudentSelection = (id: number) => {
     setSelectedStudents((prevSelected) =>
@@ -72,13 +87,11 @@ export default function AdminTripsPage() {
       setShowStudentSelector(true);
       return;
     }
-    // Implement the logic to add selected students to the trip
     console.log('Adding students to trip:', selectedStudents);
     alert(`Added ${selectedStudents.length} students to the trip.`);
     setShowStudentSelector(false);
     setSearchTerm('');
 
-    // Generate QR code data after confirming students and time allocation
     const qrData = selectedStudents.length > 0 ? selectedStudents.join(',') : 'No students';
     const durationHours = Math.round(timeMinutes / 60);
     const createdAt = Date.now();
@@ -89,8 +102,6 @@ export default function AdminTripsPage() {
     };
     setQrCodeData(JSON.stringify(payload));
 
-    // Update status of selected students to "on a trip"
-    // Update local students state
     setStudents((prevStudents) =>
       prevStudents.map((student) =>
         selectedStudents.includes(student.id)
@@ -99,7 +110,6 @@ export default function AdminTripsPage() {
       )
     );
 
-    // Optionally, send API request to update student status in backend
     try {
       await Promise.all(
         selectedStudents.map((studentId) =>
@@ -169,96 +179,95 @@ export default function AdminTripsPage() {
       alert('No audio recorded to upload.');
       return;
     }
-    // Implement upload logic here, e.g., send audioBlob to server
     console.log('Uploading audio blob:', audioBlob);
     alert('Audio uploaded successfully (mock).');
-    // Reset audio states after upload
     setAudioBlob(null);
     setAudioURL(null);
   };
 
   return (
-    <main className="min-h-screen p-6 bg-white text-black">
-      {/* Desktop view UI */}
-      <div className="flex items-center justify-center w-full h-screen p-4">
-        <div className="w-full h-full rounded-3xl bg-[#d3dbff] p-6 flex flex-col">
-          <div className="bg-white rounded-3xl p-6 flex flex-col items-center flex-grow">
-            <div className="w-full bg-[#5c6bf2] rounded-full flex items-center px-6 py-4 mb-8 space-x-6">
-              <h1 className="text-white text-5xl font-bold rounded-full bg-[#5c6bf2] px-3 py-3 focus:outline-none text-center">
-                Allocate time
-              </h1>
-              <div className="flex space-x-6 ml-auto">
+    <main
+      className="min-h-screen bg-cover bg-center p-6"
+      style={{
+        backgroundImage: "url('/student-bg.png')",
+      }}
+    >
+      <div className="flex items-center flex-col justify-center w-full h-full p-4">
+        <h1 className="text-[#5c6bf2] tracking-tighter text-5xl font-bold mb-1">Allocate time</h1>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="w-full h-full rounded-3xl bg-white bg-opacity-80 backdrop-blur-lg shadow-xl p-6 flex flex-col"
+        >
+          <div className="bg-white bg-opacity-90 rounded-3xl p-6 flex flex-col items-center flex-grow shadow-md">
+
+            {/* Header Bar */}
+            <div className="w-full bg-[#5c6bf2] rounded-4xl flex items-center px-6 py-4 mb-8 shadow-md">
+              {/* Time Selector */}
+              <div className="w-full mb-2 mt-2 bg-indigo-500 rounded-full p-2 px-4 flex flex-col items-start justify-between">
+                <p className="text-xl font-medium tracking-tighter text-black mb-2">Select time</p>
+                <div className="flex items-center space-x-4">
+                  <button className="text-[rgb(211,212,255)] font-extrabold text-4xl" onClick={incrementTime}>+</button>
+                  <span className="text-white font-extrabold text-4xl">{timeMinutes}</span>
+                  <button className="text-[rgb(211,212,255)] font-extrabold text-4xl" onClick={decrementTime}>-</button>
+                </div>
+              </div>
+              <div className="flex space-x-4 ml-auto">
                 <button
-                  className="w-20 h-12 rounded-full bg-[#8f9bff] text-white text-sm font-normal flex items-center justify-center"
+                  className="w-20 h-10 rounded-full bg-[#8f9bff] hover:bg-[#7e8fff] text-white text-sm font-medium shadow"
                   onClick={() => setTime(60)}
                 >
                   1 hr
                 </button>
                 <button
-                  className="w-20 h-12 rounded-full bg-[#8f9bff] text-white text-sm font-normal flex items-center justify-center"
+                  className="w-20 h-10 rounded-full bg-[#8f9bff] hover:bg-[#7e8fff] text-white text-sm font-medium shadow"
                   onClick={() => setTime(120)}
                 >
                   2 hr
                 </button>
               </div>
             </div>
+
+            {/* Voice Message Input */}
             <div className="w-full mb-8">
-              <p className="text-sm font-normal text-black mb-3">Select time</p>
-              <div className="flex items-center space-x-4">
+              <p className="text-sm font-medium text-black mb-2">Add personal message</p>
+              <div className="flex items-center space-x-3">
                 <button
-                  className="text-[#5c6bf2] font-bold text-2xl select-none"
-                  onClick={incrementTime}
-                >
-                  +
-                </button>
-                <span className="text-black font-extrabold text-2xl select-none">{timeMinutes}</span>
-                <button
-                  className="text-[#5c6bf2] font-bold text-2xl select-none"
-                  onClick={decrementTime}
-                >
-                  -
-                </button>
-              </div>
-              <hr className="border-t border-gray-300 mt-4" />
-            </div>
-            <div className="w-full mb-8">
-              <p className="text-sm font-normal text-black mb-3">Add personal message</p>
-              <div className="flex items-center space-x-4">
-                <button
-                  className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-black text-lg shadow"
+                  className="w-12 h-12 rounded-full bg-[#f0f0f0] hover:bg-[#e2e2e2] flex items-center justify-center text-black text-lg shadow"
                   onClick={startRecording}
                   disabled={isRecording}
                   title="Start Recording"
                 >
-                  <i className="fas fa-microphone"></i>
+                  <i className="fas fa-microphone" />
                 </button>
                 <button
-                  className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-black text-lg shadow"
+                  className="w-12 h-12 rounded-full bg-[#f0f0f0] hover:bg-[#e2e2e2] flex items-center justify-center text-black text-lg shadow"
                   onClick={stopRecording}
                   disabled={!isRecording}
                   title="Stop Recording"
                 >
-                  <i className="fas fa-stop"></i>
+                  <i className="fas fa-stop" />
                 </button>
                 <input
                   type="text"
                   placeholder="Record your msg"
-                  className="flex-1 rounded-full border border-gray-300 px-6 py-3 text-sm text-black focus:outline-none"
+                  className="flex-1 rounded-full border border-gray-300 px-6 py-3 text-sm text-black"
                   value={audioURL ? "Audio recorded" : ""}
                   readOnly
                 />
                 <button
-                  className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-black text-lg shadow"
+                  className="w-12 h-12 rounded-full bg-[#f0f0f0] hover:bg-[#e2e2e2] flex items-center justify-center text-black text-lg shadow"
                   onClick={uploadAudio}
                   disabled={!audioBlob}
                   title="Upload Audio"
                 >
-                  <i className="fas fa-upload"></i>
+                  <i className="fas fa-upload" />
                 </button>
               </div>
             </div>
 
-            {/* Conditionally render search and select students */}
+            {/* Student Selector */}
             {showStudentSelector && (
               <div className="w-full mb-8">
                 <input
@@ -266,55 +275,89 @@ export default function AdminTripsPage() {
                   placeholder="Search students"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full rounded-full border border-gray-300 px-6 py-3 text-sm text-black focus:outline-none mb-4"
+                  className="w-full rounded-full border border-gray-300 px-6 py-3 text-sm text-black mb-4"
                 />
-                <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-2 bg-white">
-                  {students.length === 0 && <p className="text-gray-500 text-sm">No students found</p>}
-                  {students.map((student) => (
-                    <label key={student.id} className="flex items-center space-x-3 mb-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={selectedStudents.includes(student.id)}
-                        onChange={() => toggleStudentSelection(student.id)}
-                        className="form-checkbox h-5 w-5 text-[#5c6bf2]"
-                      />
-                      <span>{student.name}</span>
-                    </label>
-                  ))}
+                <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-white shadow-inner">
+                  {students.length === 0 ? (
+                    <p className="text-gray-500 text-sm">No students found</p>
+                  ) : (
+                    students.map((student) => (
+                      <label
+                        key={student.id}
+                        className="flex items-center space-x-3 mb-2 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedStudents.includes(student.id)}
+                          onChange={() => toggleStudentSelection(student.id)}
+                          className="form-checkbox text-[#000000] h-5 w-5 text-[#5c6bf2]"
+                        />
+                        <span className='text-[#000000]' >{student.name}</span>
+                      </label>
+                    ))
+                  )}
                 </div>
               </div>
             )}
 
+            {/* Main Action Button */}
             <button
-              className="w-full bg-[#5c6bf2] text-white text-sm font-normal rounded-full py-4"
+              className="w-full bg-[#5c6bf2] hover:bg-[#4a58d9] text-white text-sm font-semibold rounded-full py-4 transition"
               onClick={handleAddStudentsToTrip}
               disabled={showStudentSelector && selectedStudents.length === 0}
             >
               {showStudentSelector ? 'Confirm Add Students' : 'Add Students to Trip'}
             </button>
 
-            {/* Display QR code if generated */}
+            {/* Trip Details Card */}
             {qrCodeData && (
-              <div className="mt-8 flex flex-col items-center">
-                <p className="mb-2 font-semibold text-black">Scan this QR code:</p>
-                <QRCode value={qrCodeData} size={200} />
+              <div className="mt-8 bg-[#eef0ff] p-8 rounded-3xl flex flex-row justify-between w-full shadow-md">
+
+                {/* Trip Info Section */}
+                <div className="flex flex-col w-2/3">
+                  <h2 className="text-2xl font-bold mb-6 text-black">TRIP DETAILS</h2>
+
+                  <div className="flex justify-between font-semibold text-black mb-2">
+                    <p>Name</p>
+                    <p>Number</p>
+                  </div>
+
+                  <div className="space-y-1 text-gray-600 font-medium mb-6">
+                    {selectedStudents.map((id) => {
+                      const student = students.find((s) => s.id === id);
+                      return (
+                        <div key={id} className="flex justify-between">
+                          <p>{student?.name}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <hr className="border border-black mb-4" />
+
+                  <div className="flex justify-between text-black font-semibold text-sm">
+                    <p>Total members: {selectedStudents.length.toString().padStart(2, '0')}</p>
+                    <p>Total Time : {timeMinutes}</p>
+                  </div>
+                </div>
+
+                {/* QR Code Section */}
+                <div className="w-1/3 flex flex-col items-center justify-center">
+                  <p className="mb-4 font-semibold text-black">Scan this QR code:</p>
+                  <motion.div
+                    className="bg-white p-4 rounded-2xl shadow-lg"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                  >
+                    <QRCode value={qrCodeData} size={160} />
+                  </motion.div>
+                </div>
               </div>
             )}
 
-            {/* Display student cards with map */}
-            {/* Removed as per user request */}
-            {/* <div className="w-full mt-8 space-y-6">
-              {students.map((student) => (
-                <StudentCardWithMap
-                  key={student.id}
-                  studentId={student.id}
-                  sessionId={student.sessionId}
-                  studentName={student.name}
-                />
-              ))}
-            </div> */}
           </div>
-        </div>
+        </motion.div>
       </div>
     </main>
   );

@@ -47,9 +47,9 @@ const StudentCardWithMap = ({
     if (!mapContainerRef.current) return;
 
     // Initialize the map
-    mapRef.current = L.map(mapContainerRef.current).setView([0, 0], 2);
+mapRef.current = L.map(mapContainerRef.current).setView([30.3434826, 77.9374047], 16);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap contributors",
+      attribution: "SafeMove",
     }).addTo(mapRef.current);
 
     // Initialize socket.io client
@@ -100,6 +100,16 @@ const StudentCardWithMap = ({
       firstUpdateRef.current = true;
     };
   }, [tracking, sessionId]);
+
+  // Add useEffect to call invalidateSize when tracking becomes true
+  useEffect(() => {
+    if (tracking && mapRef.current && mapContainerRef.current) {
+      // Delay invalidateSize to ensure container height transition completes
+      setTimeout(() => {
+        mapRef.current?.invalidateSize();
+      }, 300);
+    }
+  }, [tracking]);
 
   const toggleTracking = () => {
     setTracking((prev) => !prev);

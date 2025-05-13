@@ -14,13 +14,17 @@ export default function LandingPage() {
     <main className="bg-[#FFFCF8] min-h-screen text-center font-sans overflow-hidden relative">
       {/* Animated Background Glow */}
       <motion.img
-        src="/gloww.png"
-        alt="Background Glow"
-        initial={{ opacity: 0.5, scale: 1 }}
-        animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.1, 1] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[-100px] left-[-100px] w-[600px] h-[600px] z-0 pointer-events-none"
-      />
+  initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+        duration: 1, // Animation duration of 1 second
+        ease: 'easeOut', // Smooth easing
+      }}
+  src="/background.png"
+  alt="Background Test"
+  className="absolute top-0 left-0 w-full h-full z-10 opacity-70"
+/>
+    
 
       {/* Navigation */}
       <header className="flex items-center justify-between px-10 py-3.5 rounded-full shadow-md bg-white max-w-5xl mx-auto mt-10 relative z-10">

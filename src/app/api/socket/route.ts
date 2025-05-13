@@ -1,15 +1,15 @@
 import { Server, Socket } from 'socket.io';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-let io: Server | undefined;
-
 export const config = {
   api: {
     bodyParser: false,
   },
 };
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+let io: Server | undefined;
+
+export async function POST(req: NextApiRequest, res: NextApiResponse) {
   if (!io) {
     const httpServer = (res as any).socket.server;
     io = new Server(httpServer, {

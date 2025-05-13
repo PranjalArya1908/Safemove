@@ -2,8 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PendingExtensionRequests from '@/components/PendingExtensionRequests';
+import { FaArrowUp } from 'react-icons/fa';
+
 // import { motion } from 'framer-motion';
 import { motion, AnimatePresence } from 'framer-motion';
+import { link } from 'fs';
 export default function AdminPage() {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -284,7 +287,7 @@ export default function AdminPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="mt-4"
+        className="mt-4 "
       >
         <Link href={`/admin/trips?preselectedStudentId=${selectedStudent.id}`} passHref legacyBehavior>
           <a className="inline-block bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors text-center whitespace-nowrap">
@@ -395,32 +398,44 @@ export default function AdminPage() {
 
 {/* 4 dashboard  */}
 <section className="col-span-2 grid grid-cols-2 gap-6">
-  {[ 
-    { label: 'Students out', value: studentsOut },
+  {[
+    { label: 'Students out', value: studentsOut, link: '/admin/studentout' },
     { label: 'Students in', value: studentsIn },
     { label: 'Total trip Completed', value: totalTrips },
     { label: 'Emergency Number', value: emergencyNumber.toString().padStart(2, '0') }
-  ].map((item, index) => (
-    <motion.div
-      key={index}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      whileHover={{ scale: 1.02 }}
-      className="border border-gray-200 rounded-2xl p-6 relative flex flex-col justify-between bg-white shadow-sm"
-    >
-      <div>
-        <p className="text-[10px] font-semibold text-gray-500 uppercase leading-4">
-          {item.label.split(' ')[0]}<br />
-          <span className="text-gray-400 font-bold">{item.label.split(' ').slice(1).join(' ')}</span>
-        </p>
-        <h2 className="text-5xl font-extrabold text-[#4B5DFB] mt-3">{item.value}</h2>
-      </div>
-      <div className="absolute top-5 right-5 bg-[#F0F0F0] rounded-full w-9 h-9 flex items-center justify-center text-[#4B5DFB]">
-        <i className="fas fa-arrow-up text-sm"></i>
-      </div>
-    </motion.div>
-  ))}
+  ].map((item, index) => {
+    const card = (
+      <motion.div
+        key={index}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.1 }}
+        whileHover={{ scale: 1.02 }}
+        className="border border-gray-200 rounded-2xl p-6 relative flex flex-col justify-between bg-white shadow-sm hover:cursor-pointer"
+      >
+        <div>
+          <p className="text-[10px] font-semibold text-gray-500 uppercase leading-4">
+            {item.label.split(' ')[0]}<br />
+            <span className="text-gray-400 font-bold">{item.label.split(' ').slice(1).join(' ')}</span>
+          </p>
+          <h2 className="text-5xl font-extrabold text-[#4B5DFB] mt-3">{item.value}</h2>
+        </div>
+
+        {/* Arrow in a circle, tilted upwards */}
+        <div className="absolute top-5 right-5 bg-[#F0F0F0] rounded-full w-9 h-9 flex items-center justify-center text-[#4B5DFB]">
+          <FaArrowUp className="-rotate-300" />
+        </div>
+      </motion.div>
+    );
+
+    return item.link ? (
+      <Link href={item.link} key={index}>
+        {card}
+      </Link>
+    ) : (
+      <div key={index}>{card}</div>
+    );
+  })}
 </section>
 
            <motion.section
@@ -514,58 +529,66 @@ export default function AdminPage() {
   </>
 )}
 
-      {selectedStudent && (
-        <>
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40"
-            onClick={() => setSelectedStudent(null)}
-          ></div>
-          <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-orange-200 rounded-lg p-8 w-full max-w-md shadow-lg relative z-50" style={{ height: '500px' }}>
-              <button
-                className="absolute top-3 right-3 text-gray-600 hover:text-gray-900 text-2xl"
-                onClick={() => setSelectedStudent(null)}
-                aria-label="Close"
-              >
-                &times;
-              </button>
-              <div className="flex items-center space-x-6 h-full">
-                {selectedStudent.image ? (
-                  <img
-                    src={selectedStudent.image}
-                    alt={selectedStudent.name}
-                    className="w-32 h-32 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-32 h-32 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-lg">
-                    No Image
-                  </div>
-                )}
-                <div className="flex flex-col justify-center h-full">
-                  <h2 className="text-3xl font-semibold text-[#000000]">{selectedStudent.name}</h2>
-                  <p className="text-lg text-gray-700 mt-2">{selectedStudent.phone}</p>
-                  <div className="flex items-center space-x-3 mt-4">
-                    <span
-                      className={`w-5 h-5 rounded-full inline-block ${
-                        selectedStudent.status === 'inside hostel' ? 'bg-green-500' : 'bg-red-500'
-                      }`}
-                      aria-label={selectedStudent.status}
-                    ></span>
-                    <span className="text-lg text-gray-700 capitalize">{selectedStudent.status}</span>
-                  </div>
-                  <div className="mt-6">
-                  <Link href={`/admin/trips?preselectedStudentId=${selectedStudent.id}`} passHref legacyBehavior>
-                    <a className="inline-block bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors text-center whitespace-nowrap">
-                      Plan the trip
-                    </a>
-                  </Link>
-                  </div>
-                </div>
-              </div>
+     {selectedStudent && (
+  <>
+    <div
+      className="fixed inset-0 bg-blue-200 bg-opacity-50 backdrop-blur-sm z-40"
+      onClick={() => setSelectedStudent(null)}
+    ></div>
+    <div className="fixed inset-0 flex items-center justify-center z-50">
+      <div className="bg-white rounded-3xl p-10 w-full max-w-200 shadow-lg relative z-50" style={{ height: '400px' }}>
+        <button
+          className="absolute top-3 right-3 tracking-tighter text-gray-600 hover:text-gray-900 text-3xl"
+          onClick={() => setSelectedStudent(null)}
+          aria-label="Close"
+        >
+          &times;
+        </button>
+        <div className="flex items-center space-x-15 px-5 h-full">
+          {selectedStudent.image ? (
+            <img
+              src={selectedStudent.image}
+              alt={selectedStudent.name}
+              className="w-50 h-50 rounded-2xl object-cover shadow-md"
+            />
+          ) : (
+            <div className="w-50 h-50 rounded-2xl bg-gray-300 flex items-center justify-center text-gray-600 text-lg">
+              No Image
+            </div>
+          )}
+          <div className="flex flex-col justify-center h-full space-y-4">
+            <h2 className="text-3xl tracking-tighter font-semibold text-gray-900">{selectedStudent.name}</h2>
+            <p className="text-lg text-gray-700">{selectedStudent.phone}</p>
+            <div className="flex items-center space-x-3">
+              <span
+                className={`w-5 h-5 rounded-full inline-block ${
+                  selectedStudent.status === 'inside hostel' ? 'bg-green-500' : 'bg-red-500'
+                }`}
+                aria-label={selectedStudent.status}
+              ></span>
+              <span className="text-lg text-gray-700 capitalize">{selectedStudent.status}</span>
+            </div>
+            <div className="mt-4 flex gap-2  justify-items-start">
+              {selectedStudent.status === 'inside hostel' ? (
+                <Link href={`/admin/trips?preselectedStudentId=${selectedStudent.id}`} passHref legacyBehavior>
+                  <a className="inline-block bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors text-center whitespace-nowrap shadow-md">
+                    Plan the trip
+                  </a>
+                </Link>
+              ) : (
+                <Link href={`/admin/students`} passHref legacyBehavior>
+                  <a className="inline-block bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors text-center whitespace-nowrap shadow-md">
+                    Track Location
+                  </a>
+                </Link>
+              )}
             </div>
           </div>
-        </>
-      )}
+        </div>
+      </div>
+    </div>
+  </>
+)}
     </div>
   </main>
 );

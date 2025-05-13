@@ -54,13 +54,19 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const nameQuery = searchParams.get('name') || '';
+    const statusNot = searchParams.get('statusNot');
 
     const db = await openDB();
 
-    const students = await db.all(
-      'SELECT * FROM students WHERE name LIKE ?',
-      `%${nameQuery}%`
-    );
+    let query = 'SELECT * FROM students WHERE name LIKE ?';
+    const params: any[] = [`%${nameQuery}%`];
+
+    if (statusNot) {
+      query += ' AND status != ?';
+      params.push(statusNot);
+    }
+
+    const students = await db.all(query, ...params);
 
     await db.close();
 

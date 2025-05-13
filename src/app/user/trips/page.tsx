@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 
+
+
 export default function UserTripsPage() {
   const searchParams = useSearchParams();
   const durationHoursParam = searchParams.get('durationHours');
@@ -12,10 +14,8 @@ export default function UserTripsPage() {
   const [personalMessage, setPersonalMessage] = useState('');
   const [timerDuration, setTimerDuration] = useState(45 * 60); // default 45 minutes in seconds
   const [allowedToExtend, setAllowedToExtend] = useState(false); // New state to control if extension allowed
+  const [loading, setLoading] = useState(false); // Loading state for WhatsApp button
   const timerIntervalRef = useRef<number | null>(null);
-
-  // Placeholder studentId, replace with actual user id from auth/session
-  const studentId = 1;
 
   useEffect(() => {
     if (durationHoursParam) {
@@ -51,46 +51,14 @@ export default function UserTripsPage() {
     };
   }, []);
 
-  // New useEffect to watch and send geolocation updates
-  useEffect(() => {
-    if (!('geolocation' in navigator)) {
-      console.error('Geolocation is not supported by this browser.');
-      return;
-    }
 
-    const successCallback = async (position: GeolocationPosition) => {
-      const { latitude, longitude } = position.coords;
-      try {
-        const response = await fetch(`/api/students/${studentId}/location`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ latitude, longitude }),
-        });
-        if (!response.ok) {
-          console.error('Failed to update location:', await response.text());
-        }
-      } catch (error) {
-        console.error('Error sending location update:', error);
-      }
-    };
-
-    const errorCallback = (error: GeolocationPositionError) => {
-      console.error('Error getting geolocation:', error.message);
-    };
-
-    const watchId = navigator.geolocation.watchPosition(successCallback, errorCallback, {
-      enableHighAccuracy: true,
-      maximumAge: 10000,
-      timeout: 5000,
-    });
-
-    return () => {
-      navigator.geolocation.clearWatch(watchId);
-    };
-  }, [studentId]);
-
+ const phoneNumbers = [
+    '+918077868866', // Replace with real phone numbers
+    '+917505405151',
+    '+018077587054',
+    '+017534868533',
+    '+019773945332',
+  ];
   // Function to place a call using tel: link
   const placeCall = (phoneNumber: string) => {
     window.location.href = `tel:${phoneNumber}`;
@@ -218,41 +186,48 @@ export default function UserTripsPage() {
       className="relative w-full max-w-[390px] h-[844px] bg-white rounded-[40px] shadow-lg flex flex-col px-6 pt-14 pb-6"
       style={{ fontFeatureSettings: "'tnum'" }}
     >
-      Your location accessed is  for safety policy <br />
-
-      Your trip has
-      been Started
+      <div className="mb-6 flex flex-col items-center justify-center">
+    {/* <h1 className="text-[14px] font-mono tracking-tight text-gray-900">TRIP STARTED</h1> */}
+    <p className="text-[8px] font-mono tracking-tight text-gray-500 mt-2 leading-3 text-center">Your location has been accessed <br /> for safety policy.</p>
+  </div>
+      
+       <div className="mb-6 flex flex-col items-center justify-center">
+    <h1 className="text-[42px]  tracking-tighter leading-10 font-extrabold text-center mt-1 text-gray-900">Your <span className="text-blue-600"> trip</span> has <br />
+      been <span className="text-blue-600"> Started  </span></h1>
+    {/* <p className="text-[12px] font-mono tracking-tight text-gray-500 mt-2 leading-4 text-center">Your location has been accessed <br /> for safety policy.</p> */}
+  </div>
 
       <section
-        className="mt-8 bg-white rounded-2xl border border-gray-300 p-6 max-w-[350px] mx-auto text-center"
+        className="mt-6 bg-white rounded-4xl border border-gray-300   w-[330px] mx-auto text-center"
         style={{ boxShadow: '0 0 10px rgb(59 86 245 / 0.3)' }}
       >
-        <p className="text-[9px] font-mono text-gray-400 uppercase tracking-widest mb-2">
+        <p className="text-[9px] font-mono pt-6 text-gray-400 uppercase tracking-widest mb-4">
           Remaining time
         </p>
         <p
-          className="text-[56px] font-extrabold text-black leading-none"
+          className="text-[72px] font-sans font-extrabold text-black  leading-none"
           style={{ textShadow: '2px 2px 0 rgb(59 86 245 / 0.3)' }}
           aria-live="polite"
         >
           {formatTime(timerDuration)}
         </p>
+        <div className="flex align-center  justify-center w-full rounded-4xl pt-4 pb-3 space-x-2 mt-6 bg-blue-200">
         <button
           id="extendBtn"
-          className="mt-4 bg-[#3b56f5] text-white rounded-full px-8 py-3 text-sm font-normal"
+          className=" bg-[#3b56f5] text-white rounded-full mt-0  px-8 py-3 text-sm font-normal"
           onClick={handleExtendTime}
         >
           Extend Time
         </button>
-        <div className="flex justify-center space-x-4 mt-4">
+        
           <button
-            className="time-select-btn w-10 h-10 rounded-full border border-[#3b56f5] text-[#3b56f5] font-semibold hover:bg-[#d7dbff] transition"
+            className="time-select-btn w-12 h-12 rounded-full border bg-[#3b56f5] text-[#f3f5ff] font-md hover:bg-[#d7dbff] hover:text-[#3b56f5] transition"
             onClick={() => handleTimeSelect(20)}
           >
             20
           </button>
           <button
-            className="time-select-btn w-10 h-10 rounded-full border border-[#3b56f5] text-[#3b56f5] font-semibold hover:bg-[#d7dbff] transition"
+            className="time-select-btn w-12 h-12 rounded-full border bg-[#3b56f5] text-[#f3f5ff] font-md  hover:bg-[#d7dbff] hover:text-[#3b56f5] transition"
             onClick={() => handleTimeSelect(40)}
           >
             40
@@ -275,7 +250,7 @@ export default function UserTripsPage() {
         >
           Call Police
         </button>
-        <button
+        {/* <button
           className="w-full bg-[#f2300f] text-white rounded-3xl py-4 text-center text-base font-normal"
           aria-label="Emergency"
           onClick={async () => {
@@ -311,6 +286,38 @@ export default function UserTripsPage() {
         >
           Emergency
         </button>
+  */}
+        <button
+          className="w-full bg-[#f2300f] text-white rounded-3xl py-4 text-center text-base font-normal"
+          disabled={loading}  // Disable the button when loading is true
+          onClick={async () => {
+            setLoading(true);  // Set loading to true when the button is clicked
+            try {
+              const response = await fetch('/api/send-whatsap', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  message: '🚨 Emergency! Please help me immediately!',
+                    phoneNumbers: ['+918077868866', '+919773945332', '+918279454237'], // Example phone numbers
+                }),
+              });
+
+              const result = await response.json();
+              if (response.ok) {
+                alert(result.message);  // Success message alert
+              } else {
+                alert('Failed to send WhatsApp emergency message');
+              }
+            } catch (error) {
+              console.error('Error:', error);
+              alert('Error sending emergency message.');
+            } finally {
+              setLoading(false);  // Reset loading state after sending the message
+            }
+          }}
+        >
+          {loading ? 'Sending...' : 'Emergency 🚨'}  {/* Conditional button text */}
+        </button>
       </div>
 
       <div
@@ -340,28 +347,46 @@ export default function UserTripsPage() {
       </button>
 
       {showExtendDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="w-full max-w-xs rounded-3xl bg-[#d3dbff] p-6">
-            <div className="bg-white rounded-3xl p-6 flex flex-col items-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-start items-center z-50">
+          <div
+      className="relative w-full max-w-[390px] h-[844px] bg-blue-300 rounded-[40px]  shadow-lg flex flex-col px-6 pt-14 pb-6"
+      style={{ fontFeatureSettings: "'tnum'" }}
+    >
+            <div className="bg-white rounded-4xl p-6 flex flex-col items-center">
               <p className="text-[10px] font-mono text-[#6b6b6b] mb-2 tracking-widest">EXTRA TIME</p>
-              <h1 className="text-5xl font-extrabold font-sans text-black drop-shadow-[2px_2px_2px_rgba(99,102,241,0.5)] mb-6 select-none">{extendTime}:00</h1>
-              <div className="w-full bg-[#5c6bf2] rounded-full flex items-center px-6 py-3 mb-6 space-x-4">
-                <button
-                  className="text-white text-xs font-normal rounded-full bg-[#5c6bf2] px-6 py-2 focus:outline-none"
-                  onClick={sendExtensionRequest}
-                >
-                  Extend time
-                </button>
-              </div>
+              <h1 className="text-[64px] font-extrabold font-sans text-black drop-shadow-[2px_2px_2px_rgba(99,102,241,0.5)] mb-6 select-none">{extendTime}:00</h1>
+             <div className="flex align-center  justify-center w-full rounded-3xl pt-3 pb-3 space-x-2  mb-6 bg-blue-200">
+        <button
+          id="extendBtn"
+          className=" bg-[#3b56f5] text-white rounded-full mt-0  px-8 py-3 text-sm font-normal"
+          onClick={handleExtendTime}
+        >
+          Extend Time
+        </button>
+        
+          <button
+            className="time-select-btn w-12 h-12 rounded-full border bg-[#3b56f5] text-[#f3f5ff] font-md hover:bg-[#d7dbff] hover:text-[#3b56f5] transition"
+            onClick={() => handleTimeSelect(20)}
+          >
+            20
+          </button>
+          <button
+            className="time-select-btn w-12 h-12 rounded-full border bg-[#3b56f5] text-[#f3f5ff] font-md  hover:bg-[#d7dbff] hover:text-[#3b56f5] transition"
+            onClick={() => handleTimeSelect(40)}
+          >
+            40
+          </button>
+        </div>
               <div className="w-full mb-6">
-                <p className="text-xs font-normal text-black mb-2">Select time</p>
+                <p className="text-sm font-normal text-black mb-2">Select time</p>
                 <div className="flex items-center space-x-2">
-                  <button className="text-[#5c6bf2] font-bold text-xl select-none" onClick={incrementTime}>+</button>
-                  <span className="text-black font-extrabold text-xl select-none">{extendTime}</span>
-                  <button className="text-[#5c6bf2] font-bold text-xl select-none" onClick={decrementTime}>-</button>
+                  <button className="text-[#ffffff] font-bold bg-[#5c6bf2] p-2 rounded-4xl text-2xl select-none" onClick={incrementTime}>+</button>
+                  <span className="text-black font-extrabold text-2xl select-none">{extendTime}</span>
+                  <button className="text-[#ffffff] font-bold text-2xl select-none  bg-[#5c6bf2] p-2 rounded-4xl" onClick={decrementTime}>-</button>
                 </div>
                 <hr className="border-t border-gray-300 mt-3" />
               </div>
+              
               <div className="w-full mb-6">
                 <p className="text-xs font-normal text-black mb-2">Add personal message</p>
                 <div className="flex items-center space-x-2">
@@ -380,14 +405,16 @@ export default function UserTripsPage() {
                   </button>
                 </div>
               </div>
+
+
               <button
-                className="w-full bg-[#5c6bf2] text-white text-xs font-normal rounded-full py-3"
+                className="w-full bg-[#ff524c] text-white text-xs font-normal rounded-full py-5"
                 onClick={sendExtensionRequest}
               >
                 Send Extension Request
               </button>
               <button
-                className="mt-4 w-full bg-gray-300 text-black text-xs font-normal rounded-full py-3"
+                className="mt-4 w-full bg-gray-300 text-black text-xs font-normal rounded-full py-5"
                 onClick={closeExtendDialog}
               >
                 Cancel
